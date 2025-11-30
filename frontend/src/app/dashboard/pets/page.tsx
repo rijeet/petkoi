@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import ResponsiveImage from '@/components/ResponsiveImage';
 
 interface Pet {
   id: string;
@@ -54,7 +55,7 @@ export default function PetsPage() {
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -96,15 +97,20 @@ export default function PetsPage() {
                 href={`/dashboard/pets/${pet.id}`}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
               >
-                <div className="aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                <div className="mb-4 flex items-center justify-center">
                   {pet.images && pet.images.length > 0 ? (
-                    <img
+                    <ResponsiveImage
                       src={pet.images[0].url}
                       alt={pet.name}
-                      className="w-full h-full object-cover rounded-lg"
+                      aspectRatio="square"
+                      containerClassName="w-full max-w-[500px] aspect-square"
+                      className="rounded-lg"
+                      showModal={true}
                     />
                   ) : (
-                    <span className="text-gray-400">No image</span>
+                    <div className="w-full max-w-[500px] aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-400">No image</span>
+                    </div>
                   )}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{pet.name}</h3>

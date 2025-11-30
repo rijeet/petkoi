@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Body,
   Query,
@@ -44,6 +45,15 @@ export class NotificationsController {
   async markAllAsRead(@CurrentUser() user: { sub: string }) {
     await this.notificationService.markAllAsRead(user.sub);
     return { success: true };
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteNotification(
+    @Param('id') id: string,
+    @CurrentUser() user: { sub: string },
+  ) {
+    await this.notificationService.deleteNotification(id, user.sub);
   }
 }
 

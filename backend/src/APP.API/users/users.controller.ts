@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UserService } from '../../APP.BLL/services/user.service';
 import { CreateUserDto, UpdateUserDto } from '../../APP.Shared/dtos/user.dto';
@@ -48,13 +49,28 @@ export class UsersController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() user: { sub: string },
+  ) {
+    // Users can only update their own profile (unless admin)
+    if (id !== user.sub) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
+  async remove(
+    @Param('id') id: string,
+    @CurrentUser() user: { sub: string },
+  ) {
+    // Users can only delete their own account (unless admin)
+    if (id !== user.sub) {
+      throw new ForbiddenException('You can only delete your own account');
+    }
     await this.userService.delete(id);
   }
 }

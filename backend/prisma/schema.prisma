@@ -20,6 +20,7 @@ model User {
   email            String    @unique
   name             String?
   phone            String?
+  profilePicture   String?
   role             Role      @default(USER)
   googleId         String?   @unique
   createdAt        DateTime  @default(now())

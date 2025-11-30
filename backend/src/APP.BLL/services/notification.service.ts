@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../APP.Infrastructure/prisma/prisma.service';
 import { NotificationType } from '@prisma/client';
+import * as ngeohash from 'ngeohash';
 import { GPSService } from './gps.service';
 
 @Injectable()
@@ -117,12 +118,19 @@ export class NotificationService {
       return;
     }
 
+    // Generate geohash for the found location (precision 7 = ~150m accuracy)
+    const geohash = ngeohash.encode(finderLocation.lat, finderLocation.lng, 7);
+
     // Create notification for pet owner
     // Build payload object, only including fields that have values
     const notificationPayload: any = {
       petId: pet.id,
       petName: pet.name,
-      foundLocation: finderLocation,
+      foundLocation: {
+        lat: finderLocation.lat,
+        lng: finderLocation.lng,
+        geohash: geohash, // Add geohash for efficient spatial queries
+      },
       timestamp: new Date().toISOString(),
     };
 
@@ -218,6 +226,27 @@ export class NotificationService {
       data: {
         read: true,
       },
+    });
+  }
+
+  /**
+   * Delete a notification
+   */
+  async deleteNotification(notificationId: string, userId: string): Promise<void> {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id: notificationId },
+    });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    if (notification.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to delete this notification');
+    }
+
+    await this.prisma.notification.delete({
+      where: { id: notificationId },
     });
   }
 }

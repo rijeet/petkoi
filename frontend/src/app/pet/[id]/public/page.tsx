@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { apiClient } from '@/lib/api';
+import ResponsiveImage from '@/components/ResponsiveImage';
 
 interface Pet {
   id: string;
@@ -243,11 +244,14 @@ export default function PublicPetPage() {
           </div>
 
           {pet.images && pet.images.length > 0 && (
-            <div className="mb-8">
-              <img
+            <div className="mb-8 w-full">
+              <ResponsiveImage
                 src={pet.images[0].url}
                 alt={pet.name}
-                className="w-full h-96 object-cover rounded-lg"
+                aspectRatio="landscape"
+                containerClassName="w-full max-w-4xl mx-auto"
+                className="shadow-lg"
+                showModal={true}
               />
             </div>
           )}

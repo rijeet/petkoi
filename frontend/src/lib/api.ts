@@ -44,7 +44,19 @@ export class ApiClient {
       throw error;
     }
 
-    return response.json();
+    // Handle 204 No Content (DELETE operations)
+    if (response.status === 204) {
+      return null as T;
+    }
+
+    // Check if response has content to parse
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    // Return null for empty responses
+    return null as T;
   }
 
   // Auth
@@ -65,6 +77,12 @@ export class ApiClient {
     return this.request(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    });
+  }
+
+  async deleteUser(id: string) {
+    return this.request(`/users/${id}`, {
+      method: 'DELETE',
     });
   }
 
@@ -236,6 +254,12 @@ export class ApiClient {
   async markAllNotificationsAsRead() {
     return this.request('/notifications/read-all', {
       method: 'POST',
+    });
+  }
+
+  async deleteNotification(notificationId: string) {
+    return this.request(`/notifications/${notificationId}`, {
+      method: 'DELETE',
     });
   }
 

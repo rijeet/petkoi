@@ -23,6 +23,14 @@ export class UpdateUserDto {
   @IsOptional()
   name?: string;
 
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  profilePicture?: string;
+
   @IsEnum(Role)
   @IsOptional()
   role?: Role;

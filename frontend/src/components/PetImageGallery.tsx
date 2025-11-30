@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { apiClient } from '@/lib/api';
+import ResponsiveImage from './ResponsiveImage';
+import ImageModal from './ImageModal';
 
 interface PetImage {
   id: string;
@@ -62,20 +64,22 @@ export default function PetImageGallery({
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">Pet Images</h3>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         {images.map((image) => (
           <div key={image.id} className="relative group">
-            <img
+            <ResponsiveImage
               src={image.url}
               alt={`Pet image ${image.id}`}
-              className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => setSelectedImage(image.url)}
+              aspectRatio="square"
+              containerClassName="w-full"
+              className="border border-gray-200"
+              showModal={true}
             />
             {isOwner && (
               <button
                 onClick={() => handleDelete(image.id)}
                 disabled={deleting === image.id}
-                className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
+                className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs sm:text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50 z-10 shadow-lg"
               >
                 {deleting === image.id ? 'Deleting...' : 'Delete'}
               </button>
@@ -83,28 +87,6 @@ export default function PetImageGallery({
           </div>
         ))}
       </div>
-
-      {/* Image Modal */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div className="relative max-w-4xl max-h-full">
-            <img
-              src={selectedImage}
-              alt="Full size"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

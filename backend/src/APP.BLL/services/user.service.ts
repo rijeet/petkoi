@@ -6,11 +6,14 @@ export interface CreateUserDto {
   email: string;
   name?: string;
   googleId?: string;
+  profilePicture?: string;
   role?: Role;
 }
 
 export interface UpdateUserDto {
   name?: string;
+  phone?: string;
+  profilePicture?: string;
   role?: Role;
 }
 
@@ -44,6 +47,7 @@ export class UserService {
         email: data.email,
         name: data.name,
         googleId: data.googleId,
+        profilePicture: data.profilePicture,
         role: data.role || Role.USER,
       },
     });
@@ -71,14 +75,22 @@ export class UserService {
     googleId: string;
     email: string;
     name?: string;
+    profilePicture?: string;
   }): Promise<User> {
     // Try to find existing user by Google ID
     let user = await this.findByGoogleId(googleData.googleId);
 
     if (user) {
-      // Update name if provided and different
+      // Update name and profile picture if provided and different
+      const updateData: any = {};
       if (googleData.name && user.name !== googleData.name) {
-        user = await this.update(user.id, { name: googleData.name });
+        updateData.name = googleData.name;
+      }
+      if (googleData.profilePicture && user.profilePicture !== googleData.profilePicture) {
+        updateData.profilePicture = googleData.profilePicture;
+      }
+      if (Object.keys(updateData).length > 0) {
+        user = await this.update(user.id, updateData);
       }
       return user;
     }
@@ -87,10 +99,14 @@ export class UserService {
     user = await this.findByEmail(googleData.email);
 
     if (user) {
-      // Link Google ID to existing user
+      // Link Google ID to existing user and update profile picture
       return this.prisma.user.update({
         where: { id: user.id },
-        data: { googleId: googleData.googleId, name: googleData.name || user.name },
+        data: {
+          googleId: googleData.googleId,
+          name: googleData.name || user.name,
+          profilePicture: googleData.profilePicture || user.profilePicture,
+        },
       });
     }
 
@@ -99,6 +115,7 @@ export class UserService {
       email: googleData.email,
       name: googleData.name,
       googleId: googleData.googleId,
+      profilePicture: googleData.profilePicture,
     });
   }
 

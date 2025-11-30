@@ -20,7 +20,8 @@ export class AuthController {
   @Public()
   @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as GoogleProfile & { accessToken: string };
+    // The GoogleStrategy returns a flattened user object with email, name, picture as strings
+    const user = req.user as any;
     const result = await this.authService.handleGoogleLogin(user);
     
     // Redirect to frontend with token
