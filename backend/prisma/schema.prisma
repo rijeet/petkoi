@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Domain Models - APP.Entity Layer
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String?
+  phone            String?
+  role             Role      @default(USER)
+  googleId         String?   @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  pets                    Pet[]                @relation("OwnerPets")
+  previousOwnershipHistory OwnershipHistory[]  @relation("PreviousOwnership")
+  newOwnershipHistory      OwnershipHistory[]  @relation("NewOwnership")
+  notifications           Notification[]
+  communityPosts   CommunityPost[]
+  communityComments CommunityComment[]
+
+  @@map("users")
+}
+
+model Pet {
+  id           String    @id @default(uuid())
+  name         String
+  breed        String?
+  color        String?
+  dateOfBirth  DateTime?
+  neutered     Boolean
+  gender       Gender
+  description  String?
+  type         PetType
+  qrCodeUrl    String?
+  isLost       Boolean   @default(false)
+  ownerId      String?
+  owner        User?     @relation("OwnerPets", fields: [ownerId], references: [id])
+  images       PetImage[]
+  vaccines     Vaccine[]
+  family       PetFamily[]
+  history      OwnershipHistory[]
+  gpsHistory   GPSLocationHistory[]
+  qrScans      QRScanLog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([ownerId])
+  @@index([isLost])
+  @@index([type])
+  @@map("pets")
+}
+
+model PetImage {
+  id         String   @id @default(uuid())
+  petId      String
+  pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  url        String
+  fileId     String
+  tags       String[] @default([])
+  uploadedBy String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([petId])
+  @@map("pet_images")
+}
+
+model Vaccine {
+  id            String   @id @default(uuid())
+  petId         String
+  pet           Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  name          String
+  doseNumber    Int?
+  clinic        String?
+  injectionDate DateTime
+  nextDueDate   DateTime?
+  extractedMeta Json?
+  createdAt     DateTime @default(now())
+
+  @@index([petId])
+  @@index([nextDueDate])
+  @@map("vaccines")
+}
+
+model PetFamily {
+  id         String       @id @default(uuid())
+  petId      String
+  pet        Pet          @relation(fields: [petId], references: [id], onDelete: Cascade)
+  parentId   String?
+  relation   RelationType
+
+  @@index([petId])
+  @@map("pet_family")
+}
+
+model OwnershipHistory {
+  id              String   @id @default(uuid())
+  petId           String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  previousOwnerId String?
+  previousOwner   User?    @relation("PreviousOwnership", fields: [previousOwnerId], references: [id], onDelete: SetNull)
+  newOwnerId      String?
+  newOwner        User?    @relation("NewOwnership", fields: [newOwnerId], references: [id], onDelete: SetNull)
+  transferredAt   DateTime @default(now())
+  note            String?
+
+  @@index([petId])
+  @@index([newOwnerId])
+  @@index([previousOwnerId])
+  @@map("ownership_history")
+}
+
+model CommunityPost {
+  id         String   @id @default(uuid())
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title      String
+  body       String
+  imageUrl   String?
+  location   Json?
+  tags       String[]
+  upvotes    Int      @default(0)
+  downvotes  Int      @default(0)
+  createdAt  DateTime @default(now())
+  comments   CommunityComment[]
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        String   @id @default(uuid())
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  parentId  String?
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([authorId])
+  @@map("community_comments")
+}
+
+model Guard {
+  id        String @id @default(uuid())
+  name      String
+  phone     String
+  address   String
+  createdAt DateTime @default(now())
+
+  @@map("guards")
+}
+
+model WasteCollector {
+  id        String @id @default(uuid())
+  name      String
+  phone     String
+  ward      String
+  createdAt DateTime @default(now())
+
+  @@map("waste_collectors")
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  payload     Json
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model QRScanLog {
+  id              String  @id @default(uuid())
+  petId           String?
+  pet             Pet?    @relation(fields: [petId], references: [id], onDelete: SetNull)
+  scannerIp       String?
+  scannerUserAgent String?
+  createdAt       DateTime @default(now())
+
+  @@index([petId])
+  @@index([createdAt])
+  @@map("qr_scan_logs")
+}
+
+model GPSLocationHistory {
+  id         String  @id @default(uuid())
+  petId      String
+  pet        Pet     @relation(fields: [petId], references: [id], onDelete: Cascade)
+  lat        Float
+  lng        Float
+  geohash    String
+  recordedAt DateTime @default(now())
+
+  @@index([petId])
+  @@index([geohash])
+  @@index([recordedAt])
+  @@map("gps_location_history")
+}
+
+// Enums - APP.Shared Layer
+
+enum PetType {
+  DOG
+  CAT
+  BIRD
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RelationType {
+  MOTHER
+  FATHER
+  CHILD
+}
+
+enum NotificationType {
+  LOST_PET_FOUND
+  LOST_ALERT
+  VACCINE_REMINDER
+  OTHER
+}
+
