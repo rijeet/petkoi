@@ -305,11 +305,13 @@ export default function PetDetailPage() {
                     onClick={async () => {
                       if (!pet.qrCodeUrl) return;
                       try {
-                        await downloadQRCodeAsPNG(
-                          pet.qrCodeUrl,
-                          `${pet.name}-qr-code.png`,
-                          512
-                        );
+                        if (pet.qrCodeUrl) {
+                          await downloadQRCodeAsPNG(
+                            pet.qrCodeUrl,
+                            `${pet.name}-qr-code.png`,
+                            512
+                          );
+                        }
                       } catch (error) {
                         console.error('Failed to download QR code:', error);
                         alert('Failed to download QR code. Please try again.');
