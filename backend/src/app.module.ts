@@ -10,6 +10,7 @@ import { NotificationsModule } from './APP.API/notifications/notifications.modul
 import { CommunityModule } from './APP.API/community/community.module';
 import { DirectoryModule } from './APP.API/directory/directory.module';
 import { HealthModule } from './APP.API/health/health.module';
+import { PetTagsModule } from './APP.API/pet-tags/pet-tags.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HealthModule } from './APP.API/health/health.module';
     CommunityModule,
     DirectoryModule,
     HealthModule,
+    PetTagsModule,
   ],
   controllers: [],
   providers: [],

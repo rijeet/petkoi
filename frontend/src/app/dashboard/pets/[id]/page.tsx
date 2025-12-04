@@ -367,7 +367,7 @@ export default function PetDetailPage() {
             </div>
           )}
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <button
               onClick={toggleLostStatus}
               className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center ${
@@ -378,6 +378,14 @@ export default function PetDetailPage() {
             >
               {pet.isLost ? 'Mark as Found' : 'Mark as Lost'}
             </button>
+            {isOwner && (
+              <Link
+                href={`/dashboard/pets/${pet.id}/order-tag`}
+                className="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center"
+              >
+                🏷️ Order Tag
+              </Link>
+            )}
             <Link
               href={`/dashboard/pets/${pet.id}/edit`}
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"

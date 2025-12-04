@@ -421,6 +421,29 @@ export class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Pet Tag Orders
+  async createPetTagOrder(petId: string, tagColor: string, tagSize?: string) {
+    return this.request('/pet-tags/order', {
+      method: 'POST',
+      body: JSON.stringify({ petId, tagColor, tagSize }),
+    });
+  }
+
+  async getMyPetTagOrders() {
+    return this.request('/pet-tags/my-orders');
+  }
+
+  async getPetTagOrder(orderId: string) {
+    return this.request(`/pet-tags/order/${orderId}`);
+  }
+
+  async updatePetTagOrderStatus(orderId: string, status: string) {
+    return this.request(`/pet-tags/order/${orderId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

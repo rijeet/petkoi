@@ -23,6 +23,10 @@ model User {
   profilePicture   String?
   role             Role      @default(USER)
   googleId         String?   @unique
+  latitude         Float?
+  longitude        Float?
+  geohash          String?
+  address          String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   pets                    Pet[]                @relation("OwnerPets")
@@ -31,7 +35,9 @@ model User {
   notifications           Notification[]
   communityPosts   CommunityPost[]
   communityComments CommunityComment[]
+  petTagOrders            PetTagOrder[]
 
+  @@index([geohash])
   @@map("users")
 }
 
@@ -55,6 +61,7 @@ model Pet {
   history      OwnershipHistory[]
   gpsHistory   GPSLocationHistory[]
   qrScans      QRScanLog[]
+  petTagOrders PetTagOrder[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -252,5 +259,35 @@ enum NotificationType {
   LOST_ALERT
   VACCINE_REMINDER
   OTHER
+}
+
+enum PetTagOrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model PetTagOrder {
+  id            String            @id @default(uuid())
+  petId         String
+  userId        String
+  qrUrl         String            // QR code URL from pet profile
+  tagColor      String            // Green, Pink, Blue, Black
+  tagSize       String            @default("32mm")
+  previewUrl    String?           // Rendered tag preview image URL
+  status        PetTagOrderStatus  @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pet_tag_orders")
 }
 

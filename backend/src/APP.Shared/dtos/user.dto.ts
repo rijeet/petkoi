@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
 import { Role } from '@prisma/client';
 
 export class CreateUserDto {
@@ -30,6 +30,22 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   profilePicture?: string;
+
+  @IsNumber()
+  @IsOptional()
+  latitude?: number;
+
+  @IsNumber()
+  @IsOptional()
+  longitude?: number;
+
+  @IsString()
+  @IsOptional()
+  geohash?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 
   @IsEnum(Role)
   @IsOptional()
