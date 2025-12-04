@@ -127,7 +127,16 @@ export async function forwardGeocode(query: string, limit: number = 15): Promise
       return [];
     }
 
-    return data.map((item: any) => ({
+    interface NominatimResult {
+      display_name: string;
+      lat: string;
+      lon: string;
+      type?: string;
+      class?: string;
+      importance?: number;
+    }
+
+    return data.map((item: NominatimResult) => ({
       address: item.display_name,
       lat: parseFloat(item.lat),
       lng: parseFloat(item.lon),
@@ -173,7 +182,15 @@ export async function autocompleteGeocode(query: string): Promise<GeocodeResult[
       return [];
     }
 
-    return data.map((item: any) => ({
+    interface NominatimResult {
+      display_name: string;
+      lat: string;
+      lon: string;
+      type?: string;
+      class?: string;
+    }
+
+    return data.map((item: NominatimResult) => ({
       address: item.display_name,
       lat: parseFloat(item.lat),
       lng: parseFloat(item.lon),
