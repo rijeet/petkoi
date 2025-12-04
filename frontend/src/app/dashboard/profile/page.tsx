@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
 import Loading from '@/components/Loading';
@@ -13,6 +14,9 @@ interface UserProfile {
   phone?: string;
   profilePicture?: string;
   role: string;
+  latitude?: number;
+  longitude?: number;
+  address?: string;
 }
 
 export default function ProfilePage() {
@@ -264,6 +268,35 @@ export default function ProfilePage() {
               </label>
               <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <span className="capitalize">{profile.role.toLowerCase()}</span>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                {profile.address ? (
+                  <div>
+                    <p className="text-gray-800">{profile.address}</p>
+                    {profile.latitude && profile.longitude && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Coordinates: {profile.latitude.toFixed(6)}, {profile.longitude.toFixed(6)}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-gray-400">Not set</span>
+                )}
+              </div>
+              <div className="mt-2">
+                <Link
+                  href="/dashboard/confirm-location"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  {profile.address ? 'Update Location' : 'Set Location'}
+                </Link>
               </div>
             </div>
 

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserService } from '../../APP.BLL/services/user.service';
 import { AuthJwtService } from '../../APP.Infrastructure/auth/jwt.service';
 import { GoogleProfile } from '../../APP.Infrastructure/auth/google.strategy';
+import * as ngeohash from 'ngeohash';
 
 // Type for the user object returned by GoogleStrategy (flattened)
 interface GoogleStrategyUser {
@@ -23,7 +24,10 @@ export class AuthService {
     private jwtService: AuthJwtService,
   ) {}
 
-  async handleGoogleLogin(googleUser: GoogleUserInput) {
+  async handleGoogleLogin(
+    googleUser: GoogleUserInput,
+    location?: { latitude: number; longitude: number; address?: string },
+  ) {
     // Find or create user
     // The googleUser might have 'id' (from GoogleProfile) or 'googleId' (from strategy)
     const googleId = 'googleId' in googleUser ? googleUser.googleId : googleUser.id;
@@ -66,11 +70,21 @@ export class AuthService {
       profilePicture = googleUser.photos[0].value;
     }
 
+    // Generate geohash if location is provided
+    let geohash: string | undefined;
+    if (location?.latitude && location?.longitude) {
+      geohash = ngeohash.encode(location.latitude, location.longitude, 7);
+    }
+
     const user = await this.userService.findOrCreateByGoogle({
       googleId,
       email: email || `user_${googleId}@temp.local`, // Fallback email if none provided
       name: nameString,
       profilePicture,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+      geohash,
+      address: location?.address,
     });
 
     // Generate JWT token

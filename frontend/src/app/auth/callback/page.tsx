@@ -17,26 +17,69 @@ export default function AuthCallback() {
       apiClient.setToken(token);
       
       // Small delay to ensure token is set
-      setTimeout(() => {
-        // Validate token by fetching user info
-        apiClient.getCurrentUser()
-          .then((user) => {
-            console.log('Token validated successfully, user:', user);
-            // Token is valid, redirect to dashboard
-            router.push('/dashboard/pets');
-          })
-          .catch((err) => {
-            console.error('Token validation failed:', err);
-            console.error('Error details:', {
-              message: err.message,
-              stack: err.stack,
-            });
-            setError(`Failed to validate authentication: ${err.message || 'Unknown error'}. Please try again.`);
-            // Redirect to sign in after a delay
-            setTimeout(() => {
-              router.push('/auth/signin');
-            }, 5000);
+      setTimeout(async () => {
+        try {
+          // Validate token by fetching user info
+          const user = await apiClient.getCurrentUser();
+          console.log('Token validated successfully, user:', user);
+
+          // Check if we have pending location from sign-in
+          const pendingLocationStr = localStorage.getItem('pending_auth_location');
+          
+          // Check if user already has a location set (not null/undefined)
+          const userHasLocation = user.latitude != null && user.longitude != null;
+          
+          console.log('Auth callback - Location check:', {
+            hasPendingLocation: !!pendingLocationStr,
+            userHasLocation,
+            userLocation: { lat: user.latitude, lng: user.longitude },
+            pendingLocation: pendingLocationStr ? JSON.parse(pendingLocationStr) : null,
           });
+
+          // If we have pending location and user doesn't have location, redirect to confirmation page
+          if (pendingLocationStr && !userHasLocation) {
+            console.log('Redirecting to confirm-location page');
+            // Keep location in localStorage for confirmation page
+            router.push('/dashboard/confirm-location');
+            return;
+          }
+
+          // If location was provided but user already has one, update it silently
+          if (pendingLocationStr && userHasLocation) {
+            try {
+              const location = JSON.parse(pendingLocationStr);
+              // Send location to backend to update user
+              await apiClient.updateUser(user.id, {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                address: location.address,
+              });
+              console.log('User location updated successfully');
+              // Clear pending location
+              localStorage.removeItem('pending_auth_location');
+            } catch (locationError) {
+              console.warn('Failed to update user location:', locationError);
+              // Continue even if location update fails
+            }
+          } else if (pendingLocationStr) {
+            // Clear if no update needed
+            localStorage.removeItem('pending_auth_location');
+          }
+
+          // Token is valid, redirect to dashboard
+          router.push('/dashboard/pets');
+        } catch (err: any) {
+          console.error('Token validation failed:', err);
+          console.error('Error details:', {
+            message: err.message,
+            stack: err.stack,
+          });
+          setError(`Failed to validate authentication: ${err.message || 'Unknown error'}. Please try again.`);
+          // Redirect to sign in after a delay
+          setTimeout(() => {
+            router.push('/auth/signin');
+          }, 5000);
+        }
       }, 100);
     } else {
       setError('No authentication token received. Please try again.');

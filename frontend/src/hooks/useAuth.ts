@@ -10,6 +10,10 @@ interface User {
   name?: string;
   profilePicture?: string;
   role: string;
+  latitude?: number;
+  longitude?: number;
+  geohash?: string;
+  address?: string;
 }
 
 export function useAuth() {
@@ -37,17 +41,24 @@ export function useAuth() {
       // Validate token by fetching user info
       try {
         const userData = await apiClient.getCurrentUser();
+        console.log('useAuth - getCurrentUser response:', userData);
         if (userData) {
           setUser(userData as User);
         } else {
           // No user data returned, token might be invalid
+          console.warn('useAuth - No user data returned from API');
           localStorage.removeItem('auth_token');
           apiClient.setToken(null);
           setUser(null);
         }
-      } catch (error) {
+      } catch (error: any) {
         // Token is invalid, remove it
         console.error('Token validation failed:', error);
+        console.error('Error details:', {
+          message: error.message,
+          status: error.status,
+          stack: error.stack,
+        });
         localStorage.removeItem('auth_token');
         apiClient.setToken(null);
         setUser(null);

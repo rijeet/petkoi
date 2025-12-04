@@ -1,6 +1,7 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../APP.Infrastructure/prisma/prisma.service';
 import { User, Role } from '@prisma/client';
+import * as ngeohash from 'ngeohash';
 
 export interface CreateUserDto {
   email: string;
@@ -8,6 +9,10 @@ export interface CreateUserDto {
   googleId?: string;
   profilePicture?: string;
   role?: Role;
+  latitude?: number;
+  longitude?: number;
+  geohash?: string;
+  address?: string;
 }
 
 export interface UpdateUserDto {
@@ -15,6 +20,10 @@ export interface UpdateUserDto {
   phone?: string;
   profilePicture?: string;
   role?: Role;
+  latitude?: number;
+  longitude?: number;
+  geohash?: string;
+  address?: string;
 }
 
 @Injectable()
@@ -49,6 +58,10 @@ export class UserService {
         googleId: data.googleId,
         profilePicture: data.profilePicture,
         role: data.role || Role.USER,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        geohash: data.geohash,
+        address: data.address,
       },
     });
   }
@@ -76,18 +89,29 @@ export class UserService {
     email: string;
     name?: string;
     profilePicture?: string;
+    latitude?: number;
+    longitude?: number;
+    geohash?: string;
+    address?: string;
   }): Promise<User> {
     // Try to find existing user by Google ID
     let user = await this.findByGoogleId(googleData.googleId);
 
     if (user) {
-      // Update name and profile picture if provided and different
+      // Update name, profile picture, and location if provided and different
       const updateData: any = {};
       if (googleData.name && user.name !== googleData.name) {
         updateData.name = googleData.name;
       }
       if (googleData.profilePicture && user.profilePicture !== googleData.profilePicture) {
         updateData.profilePicture = googleData.profilePicture;
+      }
+      // Update location if provided (always update on login to keep location current)
+      if (googleData.latitude !== undefined && googleData.longitude !== undefined) {
+        updateData.latitude = googleData.latitude;
+        updateData.longitude = googleData.longitude;
+        updateData.geohash = googleData.geohash;
+        updateData.address = googleData.address;
       }
       if (Object.keys(updateData).length > 0) {
         user = await this.update(user.id, updateData);
@@ -99,13 +123,17 @@ export class UserService {
     user = await this.findByEmail(googleData.email);
 
     if (user) {
-      // Link Google ID to existing user and update profile picture
+      // Link Google ID to existing user and update profile picture and location
       return this.prisma.user.update({
         where: { id: user.id },
         data: {
           googleId: googleData.googleId,
           name: googleData.name || user.name,
           profilePicture: googleData.profilePicture || user.profilePicture,
+          latitude: googleData.latitude,
+          longitude: googleData.longitude,
+          geohash: googleData.geohash,
+          address: googleData.address,
         },
       });
     }
@@ -116,6 +144,10 @@ export class UserService {
       name: googleData.name,
       googleId: googleData.googleId,
       profilePicture: googleData.profilePicture,
+      latitude: googleData.latitude,
+      longitude: googleData.longitude,
+      geohash: googleData.geohash,
+      address: googleData.address,
     });
   }
 
@@ -125,9 +157,15 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
+    // Generate geohash if latitude and longitude are provided
+    const updateData: any = { ...data };
+    if (data.latitude !== undefined && data.longitude !== undefined) {
+      updateData.geohash = ngeohash.encode(data.latitude, data.longitude, 7);
+    }
+
     return this.prisma.user.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
