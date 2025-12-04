@@ -4,6 +4,28 @@ import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { reverseGeocode, forwardGeocode, autocompleteGeocode, type GeocodeResult } from '@/lib/geocoding';
 
+// Types for Leaflet map and events
+interface LeafletMap {
+  setView: (center: [number, number], zoom: number) => void;
+}
+
+interface LeafletMapClickEvent {
+  latlng: {
+    lat: number;
+    lng: number;
+  };
+}
+
+interface LeafletMarkerDragEvent {
+  target: {
+    getLatLng: () => { lat: number; lng: number };
+  };
+}
+
+interface LeafletMarker {
+  getLatLng: () => { lat: number; lng: number };
+}
+
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
   ssr: false,
@@ -23,8 +45,8 @@ function MapEventHandler({
   onMapReady, 
   onMapClick 
 }: { 
-  onMapReady: (map: any) => void;
-  onMapClick: (e: any) => void;
+  onMapReady: (map: LeafletMap) => void;
+  onMapClick: (e: LeafletMapClickEvent) => void;
 }) {
   // Dynamically import hooks only when component is rendered (inside MapContainer)
   const ReactLeaflet = require('react-leaflet');
@@ -176,7 +198,7 @@ export default function LocationPicker({
     }
   };
 
-  const handleMapClick = async (e: any) => {
+  const handleMapClick = async (e: LeafletMapClickEvent) => {
     const { lat, lng } = e.latlng;
     const newLocation = { lat, lng };
     setLocation(newLocation);
@@ -184,7 +206,7 @@ export default function LocationPicker({
     await reverseGeocodeLocation(lat, lng);
   };
 
-  const handleMarkerDragEnd = async (e: any) => {
+  const handleMarkerDragEnd = async (e: LeafletMarkerDragEvent) => {
     const marker = e.target;
     const position = marker.getLatLng();
     const newLocation = { lat: position.lat, lng: position.lng };
@@ -495,7 +517,7 @@ export default function LocationPicker({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <MapEventHandler 
-            onMapReady={(map) => {
+            onMapReady={(map: LeafletMap) => {
               mapRef.current = map;
             }}
             onMapClick={handleMapClick}
@@ -506,7 +528,7 @@ export default function LocationPicker({
             eventHandlers={{
               dragend: handleMarkerDragEnd,
             }}
-            ref={(marker: any) => {
+            ref={(marker: LeafletMarker | null) => {
               if (marker) {
                 markerRef.current = marker;
               }

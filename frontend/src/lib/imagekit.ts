@@ -37,7 +37,6 @@ export function transformImageKitUrl(
 
   // Parse the URL
   const urlObj = new URL(url);
-  const pathname = urlObj.pathname;
 
   // Build transformation string
   const transformations: string[] = [];

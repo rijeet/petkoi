@@ -11,19 +11,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user: _user, account }) {
       if (account?.provider === 'google' && account.access_token) {
         try {
           // Exchange Google token with backend to get JWT
-          const response = await fetch(`${API_URL}/auth/google/callback`, {
+          // Backend redirects with token, so we'll handle it in the callback page
+          // For now, just allow sign in
+          await fetch(`${API_URL}/auth/google/callback`, {
             method: 'GET',
             headers: {
               Authorization: `Bearer ${account.access_token}`,
             },
           });
           
-          // Backend redirects with token, so we'll handle it in the callback page
-          // For now, just allow sign in
           return true;
         } catch (error) {
           console.error('Auth error:', error);
