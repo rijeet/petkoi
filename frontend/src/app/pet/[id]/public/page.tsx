@@ -48,7 +48,7 @@ export default function PublicPetPage() {
   const loadPet = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.getPublicPet(params.id as string);
+      const data = await apiClient.getPublicPet(params.id as string) as Pet;
       setPet(data);
     } catch (error: unknown) {
       console.error('Failed to load pet:', error);

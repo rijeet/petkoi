@@ -9,7 +9,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import { downloadQRCodeAsPNG } from '@/lib/qr-download';
 import PetImageUpload from '@/components/PetImageUpload';
 import PetImageGallery from '@/components/PetImageGallery';
-import PetMap from '@/components/PetMap';
 import ResponsiveImage from '@/components/ResponsiveImage';
 import dynamic from 'next/dynamic';
 
@@ -82,7 +81,7 @@ export default function PetDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPet(params.id as string);
+      const data = await apiClient.getPet(params.id as string) as Pet;
       setPet(data);
     } catch (error) {
       console.error('Failed to load pet:', error);
@@ -97,7 +96,7 @@ export default function PetDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPetImages(params.id as string);
+      const data = await apiClient.getPetImages(params.id as string) as PetImage[];
       setImages(data);
     } catch (error) {
       console.error('Failed to load images:', error);
@@ -129,7 +128,7 @@ export default function PetDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getNotifications(50, 0);
+      const data = await apiClient.getNotifications(50, 0) as { notifications: any[] };
       // Filter notifications related to this pet
       const petNotifications = data.notifications.filter(
         (notif: any) => notif.payload?.petId === params.id
@@ -305,11 +304,13 @@ export default function PetDetailPage() {
                   <button
                     onClick={async () => {
                       try {
-                        await downloadQRCodeAsPNG(
-                          pet.qrCodeUrl,
-                          `${pet.name}-qr-code.png`,
-                          512
-                        );
+                        if (pet.qrCodeUrl) {
+                          await downloadQRCodeAsPNG(
+                            pet.qrCodeUrl,
+                            `${pet.name}-qr-code.png`,
+                            512
+                          );
+                        }
                       } catch (error) {
                         console.error('Failed to download QR code:', error);
                         alert('Failed to download QR code. Please try again.');

@@ -55,7 +55,7 @@ export default function CommunityPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPosts();
+      const data = await apiClient.getPosts() as Post[];
       setPosts(data);
     } catch (error) {
       console.error('Failed to load posts:', error);

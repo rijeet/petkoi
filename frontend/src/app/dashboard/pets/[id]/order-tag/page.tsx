@@ -25,7 +25,7 @@ interface Pet {
 export default function OrderTagPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState<string>('GREEN');
@@ -51,7 +51,7 @@ export default function OrderTagPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPet(params.id as string);
+      const data = await apiClient.getPet(params.id as string) as Pet;
       setPet(data);
       
       if (!data.qrCodeUrl) {
@@ -78,7 +78,7 @@ export default function OrderTagPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const order = await apiClient.createPetTagOrder(pet.id, selectedColor, '32mm');
+      const order = await apiClient.createPetTagOrder(pet.id, selectedColor, '32mm') as { id: string };
       // Redirect to order details page
       router.push(`/dashboard/orders/${order.id}`);
     } catch (error: unknown) {
