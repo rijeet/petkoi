@@ -66,6 +66,7 @@ export class AuthController {
     const result = await this.authService.handleGoogleLogin(user, location);
     
     // Redirect to frontend with token
+    // Use FRONTEND_URL from env if set, otherwise fallback to localhost
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(`${frontendUrl}/auth/callback?token=${result.token}`);
   }

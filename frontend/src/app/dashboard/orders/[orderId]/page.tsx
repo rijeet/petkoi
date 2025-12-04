@@ -77,8 +77,8 @@ export default function OrderDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPetTagOrder(params.orderId as string) as PetTagOrder;
-      setOrder(data);
+          const data = await apiClient.getPetTagOrder(params.orderId as string) as PetTagOrder;
+          setOrder(data);
     } catch (error) {
       console.error('Failed to load order:', error);
     } finally {

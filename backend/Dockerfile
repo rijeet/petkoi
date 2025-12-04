@@ -3,7 +3,7 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Install build dependencies for canvas (native module)
+# Install build dependencies for canvas (native module) and OpenSSL for Prisma
 RUN apt-get update && apt-get install -y \
     build-essential \
     libcairo2-dev \
@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libgif-dev \
     librsvg2-dev \
     python3 \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
@@ -36,13 +37,14 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Install runtime dependencies for canvas
+# Install runtime dependencies for canvas and OpenSSL for Prisma
 RUN apt-get update && apt-get install -y \
     libcairo2 \
     libpango1.0-0 \
     libjpeg62-turbo \
     libgif7 \
     librsvg2-2 \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files

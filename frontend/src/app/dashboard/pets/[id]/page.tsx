@@ -81,8 +81,8 @@ export default function PetDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPet(params.id as string) as Pet;
-      setPet(data);
+          const data = await apiClient.getPet(params.id as string) as Pet;
+          setPet(data);
     } catch (error) {
       console.error('Failed to load pet:', error);
     } finally {
@@ -96,8 +96,8 @@ export default function PetDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPetImages(params.id as string) as PetImage[];
-      setImages(data);
+          const data = await apiClient.getPetImages(params.id as string) as PetImage[];
+          setImages(data);
     } catch (error) {
       console.error('Failed to load images:', error);
     }
@@ -128,9 +128,9 @@ export default function PetDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getNotifications(50, 0) as { notifications: any[] };
-      // Filter notifications related to this pet
-      const petNotifications = data.notifications.filter(
+          const data = await apiClient.getNotifications(50, 0) as { notifications: Notification[] };
+          // Filter notifications related to this pet
+          const petNotifications = data.notifications.filter(
         (notif: any) => notif.payload?.petId === params.id
       );
       setNotifications(petNotifications);
@@ -212,21 +212,21 @@ export default function PetDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         <Link
           href="/dashboard/pets"
-          className="text-pink-500 hover:text-pink-600 mb-4 inline-block"
+          className="text-sm sm:text-base text-pink-500 hover:text-pink-600 mb-4 inline-block font-medium"
         >
           ← Back to Pets
         </Link>
 
-        <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
           {/* Header with Name and Status Badges */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-4xl font-bold">{pet.name}</h1>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 break-words">{pet.name}</h1>
                 {isOwner && unreadCount > 0 && (
                   <span className="px-3 py-1 bg-blue-500 text-white text-sm rounded-full font-medium shadow-sm">
                     {unreadCount} new
@@ -238,7 +238,7 @@ export default function PetDetailPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-4 text-gray-600">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm sm:text-base text-gray-700">
                 <span className="capitalize">{pet.type}</span>
                 {pet.breed && <span>• {pet.breed}</span>}
                 {pet.color && <span>• {pet.color}</span>}
@@ -303,6 +303,7 @@ export default function PetDetailPage() {
                   </div>
                   <button
                     onClick={async () => {
+                      if (!pet.qrCodeUrl) return;
                       try {
                         if (pet.qrCodeUrl) {
                           await downloadQRCodeAsPNG(
@@ -368,10 +369,10 @@ export default function PetDetailPage() {
             </div>
           )}
 
-          <div className="flex gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap">
             <button
               onClick={toggleLostStatus}
-              className={`px-6 py-3 rounded-lg transition-colors flex items-center justify-center ${
+              className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base font-medium shadow-md hover:shadow-lg ${
                 pet.isLost
                   ? 'bg-green-500 text-white hover:bg-green-600'
                   : 'bg-yellow-500 text-white hover:bg-yellow-600'
@@ -382,20 +383,20 @@ export default function PetDetailPage() {
             {isOwner && (
               <Link
                 href={`/dashboard/pets/${pet.id}/order-tag`}
-                className="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors flex items-center justify-center text-sm sm:text-base font-medium shadow-md hover:shadow-lg"
               >
                 🏷️ Order Tag
               </Link>
             )}
             <Link
               href={`/dashboard/pets/${pet.id}/edit`}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center text-sm sm:text-base font-medium shadow-md hover:shadow-lg"
             >
               Edit
             </Link>
             <button
               onClick={handleDelete}
-              className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center text-sm sm:text-base font-medium shadow-md hover:shadow-lg"
             >
               Delete
             </button>

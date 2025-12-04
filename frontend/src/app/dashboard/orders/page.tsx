@@ -67,8 +67,8 @@ export default function OrdersPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getMyPetTagOrders() as PetTagOrder[];
-      setOrders(data);
+          const data = await apiClient.getMyPetTagOrders() as PetTagOrder[];
+          setOrders(data);
     } catch (error) {
       console.error('Failed to load orders:', error);
     } finally {
@@ -88,13 +88,13 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">My Orders</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">My Orders</h1>
           <Link
             href="/dashboard/pets"
-            className="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm sm:text-base font-medium shadow-md hover:shadow-lg text-center"
           >
             ← Back to Pets
           </Link>

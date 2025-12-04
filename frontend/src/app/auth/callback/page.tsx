@@ -32,7 +32,8 @@ function AuthCallbackContent() {
       setTimeout(async () => {
         try {
           // Validate token by fetching user info
-          const user = await apiClient.getCurrentUser() as User;
+          const userData = await apiClient.getCurrentUser();
+          const user = userData as User;
           console.log('Token validated successfully, user:', user);
 
           // Check if we have pending location from sign-in
@@ -103,22 +104,22 @@ function AuthCallbackContent() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4 text-red-600">Authentication Error</h2>
-          <p className="text-gray-600">{error}</p>
-          <p className="text-sm text-gray-500 mt-2">Redirecting to sign in...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-orange-50 px-4">
+        <div className="text-center max-w-md w-full bg-white rounded-lg shadow-lg p-6 sm:p-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-red-600">Authentication Error</h2>
+          <p className="text-sm sm:text-base text-gray-700 mb-4">{error}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Redirecting to sign in...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4"></div>
-        <h2 className="text-2xl font-bold mb-4">Completing sign in...</h2>
-        <p className="text-gray-600">Please wait while we redirect you.</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-orange-50 px-4">
+      <div className="text-center max-w-md w-full bg-white rounded-lg shadow-lg p-6 sm:p-8">
+        <div className="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-pink-500 mb-4"></div>
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">Completing sign in...</h2>
+        <p className="text-sm sm:text-base text-gray-700">Please wait while we redirect you.</p>
       </div>
     </div>
   );
@@ -128,10 +129,10 @@ export default function AuthCallback() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4"></div>
-            <h2 className="text-2xl font-bold mb-4">Loading...</h2>
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-orange-50 px-4">
+          <div className="text-center max-w-md w-full bg-white rounded-lg shadow-lg p-6 sm:p-8">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-pink-500 mb-4"></div>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900">Loading...</h2>
           </div>
         </div>
       }

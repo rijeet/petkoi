@@ -54,8 +54,8 @@ export default function ProfilePage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const userData = await apiClient.getCurrentUser() as UserProfile;
-      setProfile(userData);
+          const userData = await apiClient.getCurrentUser() as UserProfile;
+          setProfile(userData);
       setFormData({
         name: userData.name || '',
         phone: userData.phone || '',
@@ -153,15 +153,15 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-4xl font-bold">My Profile</h1>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">My Profile</h1>
             {!editing && (
               <button
                 onClick={() => setEditing(true)}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center text-sm sm:text-base font-medium shadow-md hover:shadow-lg"
               >
                 Edit Profile
               </button>

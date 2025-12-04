@@ -72,10 +72,10 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-orange-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-2">Pet Identity Platform</h1>
-        <p className="text-center text-gray-600 mb-8">Sign in to manage your pets</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-pink-50 to-orange-50 px-4 py-8">
+      <div className="w-full max-w-md p-6 sm:p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2 text-gray-900">Pet Identity Platform</h1>
+        <p className="text-center text-sm sm:text-base text-gray-700 mb-6 sm:mb-8">Sign in to manage your pets</p>
         
         {locationError && (
           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
@@ -86,7 +86,7 @@ export default function SignInPage() {
         <button
           onClick={handleGoogleSignIn}
           disabled={isRequestingLocation}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-700"
         >
           {isRequestingLocation ? (
             <>

@@ -136,7 +136,7 @@ export class ApiClient {
     formData.append('image', file);
 
     const url = `${this.baseUrl}/pets/${petId}/images`;
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
 
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
@@ -177,7 +177,7 @@ export class ApiClient {
 
   async deletePetImage(petId: string, imageId: string) {
     const url = `${this.baseUrl}/pets/${petId}/images/${imageId}`;
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
 
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
