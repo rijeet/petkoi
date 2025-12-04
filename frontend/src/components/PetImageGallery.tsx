@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { apiClient } from '@/lib/api';
 import ResponsiveImage from './ResponsiveImage';
-import ImageModal from './ImageModal';
 
 interface PetImage {
   id: string;
@@ -25,7 +24,6 @@ export default function PetImageGallery({
   isOwner = false,
   onDelete,
 }: PetImageGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const handleDelete = async (imageId: string) => {

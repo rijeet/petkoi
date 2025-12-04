@@ -55,7 +55,7 @@ const COLOR_HEX: Record<string, string> = {
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const [order, setOrder] = useState<PetTagOrder | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -77,8 +77,8 @@ export default function OrderDetailPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPetTagOrder(params.orderId as string);
-      setOrder(data);
+          const data = await apiClient.getPetTagOrder(params.orderId as string) as PetTagOrder;
+          setOrder(data);
     } catch (error) {
       console.error('Failed to load order:', error);
     } finally {

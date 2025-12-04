@@ -24,12 +24,22 @@ async function bootstrap() {
     })
   );
 
-  // CORS configuration
-app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-      /\.onrender\.com$/,
-    ],
+  // CORS configuration - use environment variables
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const allowedOrigins: (string | RegExp)[] = [frontendUrl];
+  
+  // Add localhost for development if not already included
+  if (!frontendUrl.includes('localhost')) {
+    allowedOrigins.push('http://localhost:3000');
+  }
+  
+  // Add regex pattern for Render domains if in production
+  if (process.env.NODE_ENV === 'production') {
+    allowedOrigins.push(/\.onrender\.com$/);
+  }
+  
+  app.enableCors({
+    origin: allowedOrigins,
     credentials: true,
   });
 

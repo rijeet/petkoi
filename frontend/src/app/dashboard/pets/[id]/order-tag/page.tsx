@@ -25,7 +25,7 @@ interface Pet {
 export default function OrderTagPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState<string>('GREEN');
@@ -51,8 +51,8 @@ export default function OrderTagPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPet(params.id as string);
-      setPet(data);
+          const data = await apiClient.getPet(params.id as string) as Pet;
+          setPet(data);
       
       if (!data.qrCodeUrl) {
         setError('This pet does not have a QR code. Please ensure your pet has a QR code before ordering a tag.');
@@ -78,9 +78,9 @@ export default function OrderTagPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const order = await apiClient.createPetTagOrder(pet.id, selectedColor, '32mm');
-      // Redirect to order details page
-      router.push(`/dashboard/orders/${order.id}`);
+          const order = await apiClient.createPetTagOrder(pet.id, selectedColor, '32mm') as { id: string };
+          // Redirect to order details page
+          router.push(`/dashboard/orders/${order.id}`);
     } catch (error: unknown) {
       console.error('Failed to create order:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';

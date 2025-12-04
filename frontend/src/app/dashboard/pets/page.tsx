@@ -18,7 +18,7 @@ interface Pet {
 }
 
 export default function PetsPage() {
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export default function PetsPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPets();
+      const data = await apiClient.getPets() as Pet[];
       setPets(data);
     } catch (error) {
       console.error('Failed to load pets:', error);
@@ -67,35 +67,35 @@ export default function PetsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">My Pets</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">My Pets</h1>
           <Link
             href="/dashboard/pets/new"
-            className="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors text-sm sm:text-base font-medium shadow-md hover:shadow-lg text-center"
           >
             + Add Pet
           </Link>
         </div>
 
         {pets.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
-            <p className="text-gray-600 mb-4">You don't have any pets yet.</p>
+          <div className="text-center py-8 sm:py-12 bg-white rounded-lg shadow-md p-6">
+            <p className="text-sm sm:text-base text-gray-700 mb-4">You don't have any pets yet.</p>
             <Link
               href="/dashboard/pets/new"
-              className="text-pink-500 hover:text-pink-600 font-medium"
+              className="inline-block text-sm sm:text-base text-pink-500 hover:text-pink-600 font-medium"
             >
               Add your first pet →
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {pets.map((pet) => (
               <Link
                 key={pet.id}
                 href={`/dashboard/pets/${pet.id}`}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6"
               >
                 <div className="mb-4 flex items-center justify-center">
                   {pet.images && pet.images.length > 0 ? (
@@ -113,13 +113,13 @@ export default function PetsPage() {
                     </div>
                   )}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{pet.name}</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900">{pet.name}</h3>
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700">
                   <span className="capitalize">{pet.type}</span>
                   {pet.breed && <span>• {pet.breed}</span>}
                 </div>
                 {pet.isLost && (
-                  <span className="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                  <span className="inline-block mt-2 px-2 sm:px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs sm:text-sm font-medium">
                     Lost
                   </span>
                 )}

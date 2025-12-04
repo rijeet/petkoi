@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ImageModal from './ImageModal';
-import { transformImageKitUrl, imageTransforms } from '@/lib/imagekit';
+import { transformImageKitUrl } from '@/lib/imagekit';
 
 interface ResponsiveImageProps {
   src: string;

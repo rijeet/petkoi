@@ -23,6 +23,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     }
     
     // Build full callback URL
+    // Use BACKEND_URL from env if set, otherwise fallback to localhost
     const backendUrl = configService.get<string>('BACKEND_URL') || 
                       `http://localhost:${configService.get<string>('PORT', '3001')}`;
     const callbackPath = configService.get<string>('GOOGLE_CALLBACK_URL', '/auth/google/callback');

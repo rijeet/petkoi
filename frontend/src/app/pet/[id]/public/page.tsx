@@ -48,7 +48,7 @@ export default function PublicPetPage() {
   const loadPet = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.getPublicPet(params.id as string);
+      const data = await apiClient.getPublicPet(params.id as string) as Pet;
       setPet(data);
     } catch (error: unknown) {
       console.error('Failed to load pet:', error);
@@ -226,17 +226,17 @@ export default function PublicPetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2">{pet.name}</h1>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-gray-900">{pet.name}</h1>
             {pet.isLost && (
-              <div className="inline-block px-4 py-2 bg-red-100 text-red-800 rounded-full font-medium mb-4">
+              <div className="inline-block px-3 sm:px-4 py-2 bg-red-100 text-red-800 rounded-full text-xs sm:text-sm font-medium mb-4">
                 ⚠️ This pet is lost. Please contact the owner if found.
               </div>
             )}
-            <div className="flex items-center justify-center gap-4 text-gray-600">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-sm sm:text-base text-gray-700">
               <span className="capitalize">{pet.type}</span>
               {pet.breed && <span>• {pet.breed}</span>}
               {pet.color && <span>• {pet.color}</span>}
@@ -257,23 +257,23 @@ export default function PublicPetPage() {
           )}
 
           {pet.description && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">About</h2>
-              <p className="text-gray-700">{pet.description}</p>
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-900">About</h2>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed break-words">{pet.description}</p>
             </div>
           )}
 
           {pet.vaccines && pet.vaccines.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Vaccination Records</h2>
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-900">Vaccination Records</h2>
               <div className="space-y-2">
                 {pet.vaccines.map((vaccine, index) => (
-                  <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="font-medium">{vaccine.name}</div>
-                    <div className="text-sm text-gray-600">
+                  <div key={index} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                    <div className="text-sm sm:text-base font-medium text-gray-900 mb-1">{vaccine.name}</div>
+                    <div className="text-xs sm:text-sm text-gray-700">
                       Date: {new Date(vaccine.injectionDate).toLocaleDateString()}
                       {vaccine.nextDueDate && (
-                        <span className="ml-4">
+                        <span className="block sm:inline sm:ml-4 mt-1 sm:mt-0">
                           Next due: {new Date(vaccine.nextDueDate).toLocaleDateString()}
                         </span>
                       )}
@@ -409,7 +409,7 @@ export default function PublicPetPage() {
                     <button
                       onClick={handleSendLocation}
                       disabled={sendingLocation || uploadingImage}
-                      className="w-full px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base font-medium shadow-md hover:shadow-lg"
                     >
                       {sendingLocation || uploadingImage ? (
                         <span className="flex items-center justify-center gap-2">
