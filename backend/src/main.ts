@@ -25,15 +25,18 @@ async function bootstrap() {
   );
 
   // CORS configuration
-  app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+app.enableCors({
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      /\.onrender\.com$/,
+    ],
     credentials: true,
   });
 
   // Swagger/OpenAPI documentation
   const config = new DocumentBuilder()
-    .setTitle('Pet Identity Platform API')
-    .setDescription('REST API for Pet Identity Platform - QR codes, GPS tracking, and community features')
+    .setTitle('Pet Koi')
+    .setDescription('REST API for Pet Koi - QR codes, GPS tracking, and community features')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -65,8 +68,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/docs/api`);
+  console.log(`Backend running on port ${port}`);
 }
 
 bootstrap();
