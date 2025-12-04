@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useMap, useMapEvents } from 'react-leaflet';
 import { reverseGeocode, forwardGeocode, autocompleteGeocode, type GeocodeResult } from '@/lib/geocoding';
-import { useMap, useMapEvents } from 'react-leaflet';
 
 // Types for Leaflet map and events
 interface LeafletMap {
