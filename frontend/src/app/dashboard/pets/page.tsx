@@ -18,7 +18,7 @@ interface Pet {
 }
 
 export default function PetsPage() {
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export default function PetsPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPets();
+      const data = await apiClient.getPets() as Pet[];
       setPets(data);
     } catch (error) {
       console.error('Failed to load pets:', error);

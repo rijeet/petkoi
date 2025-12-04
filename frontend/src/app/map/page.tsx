@@ -53,9 +53,16 @@ export default function MapPage() {
     try {
       setLoading(true);
       if (userLocation) {
-        const data = await apiClient.findNearbyPets(userLocation[0], userLocation[1], 10);
+        const data = await apiClient.findNearbyPets(userLocation[0], userLocation[1], 10) as Array<{
+          id: string;
+          name: string;
+          type: string;
+          lastKnownLat?: number;
+          lastKnownLng?: number;
+          isLost: boolean;
+        }>;
         setPets(
-          data.map((pet: any) => ({
+          data.map((pet) => ({
             id: pet.id,
             name: pet.name,
             type: pet.type,

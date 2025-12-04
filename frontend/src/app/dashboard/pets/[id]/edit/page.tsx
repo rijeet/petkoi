@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
-import { useAuth } from '@/hooks/useAuth';
 
 interface Pet {
   id: string;
@@ -21,7 +20,6 @@ interface Pet {
 export default function EditPetPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pet, setPet] = useState<Pet | null>(null);
@@ -47,7 +45,7 @@ export default function EditPetPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getPet(params.id as string);
+      const data = await apiClient.getPet(params.id as string) as Pet;
       setPet(data);
       
       // Format date for input field (YYYY-MM-DD)

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { reverseGeocode, forwardGeocode, autocompleteGeocode, type GeocodeResult } from '@/lib/geocoding';
+import { useMap, useMapEvents } from 'react-leaflet';
 
 // Types for Leaflet map and events
 interface LeafletMap {
@@ -48,9 +49,7 @@ function MapEventHandler({
   onMapReady: (map: LeafletMap) => void;
   onMapClick: (e: LeafletMapClickEvent) => void;
 }) {
-  // Dynamically import hooks only when component is rendered (inside MapContainer)
-  const ReactLeaflet = require('react-leaflet');
-  const map = ReactLeaflet.useMap();
+  const map = useMap();
   
   useEffect(() => {
     if (map) {
@@ -58,7 +57,7 @@ function MapEventHandler({
     }
   }, [map, onMapReady]);
   
-  ReactLeaflet.useMapEvents({
+  useMapEvents({
     click: onMapClick,
   });
   

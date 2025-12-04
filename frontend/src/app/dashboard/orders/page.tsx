@@ -45,7 +45,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { loading: authLoading, isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<PetTagOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +67,7 @@ export default function OrdersPage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const data = await apiClient.getMyPetTagOrders();
+      const data = await apiClient.getMyPetTagOrders() as PetTagOrder[];
       setOrders(data);
     } catch (error) {
       console.error('Failed to load orders:', error);

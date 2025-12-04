@@ -54,7 +54,7 @@ export default function ProfilePage() {
       if (token) {
         apiClient.setToken(token);
       }
-      const userData = await apiClient.getCurrentUser();
+      const userData = await apiClient.getCurrentUser() as UserProfile;
       setProfile(userData);
       setFormData({
         name: userData.name || '',
