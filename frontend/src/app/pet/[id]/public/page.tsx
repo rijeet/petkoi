@@ -244,15 +244,18 @@ export default function PublicPetPage() {
           </div>
 
           {pet.images && pet.images.length > 0 && (
-            <div className="mb-8 w-full">
-              <ResponsiveImage
-                src={pet.images[0].url}
-                alt={pet.name}
-                aspectRatio="landscape"
-                containerClassName="w-full max-w-4xl mx-auto"
-                className="shadow-lg"
-                showModal={true}
-              />
+            <div className="mb-8 w-full flex justify-center">
+              <div className="relative w-full max-w-[400px]">
+                <ResponsiveImage
+                  src={pet.images[0].url}
+                  alt={pet.name}
+                  aspectRatio="4:5"
+                  objectFit="cover"
+                  containerClassName="w-full aspect-[4/5] border-4 border-pink-200 shadow-lg rounded-lg overflow-hidden"
+                  className="rounded-lg"
+                  showModal={true}
+                />
+              </div>
             </div>
           )}
 

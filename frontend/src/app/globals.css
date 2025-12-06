@@ -5,6 +5,15 @@
 /* Leaflet CSS */
 @import 'leaflet/dist/leaflet.css';
 
+/* JakartaDisplay Font */
+@font-face {
+  font-family: 'JakartaDisplay';
+  src: url('/JakartaDisplay-woJAP.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background-light: #ffe6f0;
   --background-dark: #111;

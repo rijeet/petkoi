@@ -9,7 +9,26 @@ interface ImageModalProps {
   onClose: () => void;
 }
 
+/**
+ * Get full resolution URL by removing ImageKit transformations
+ */
+function getFullResolutionUrl(url: string): string {
+  if (!url || !url.includes('imagekit.io')) {
+    return url;
+  }
+  
+  try {
+    const urlObj = new URL(url);
+    // Remove transformation parameters to get original full resolution
+    urlObj.searchParams.delete('tr');
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+}
+
 export default function ImageModal({ imageUrl, alt, isOpen, onClose }: ImageModalProps) {
+  const fullResUrl = getFullResolutionUrl(imageUrl);
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -49,10 +68,11 @@ export default function ImageModal({ imageUrl, alt, isOpen, onClose }: ImageModa
           </svg>
         </button>
         <img
-          src={imageUrl}
+          src={fullResUrl}
           alt={alt}
           className="max-w-full max-h-full object-contain rounded-lg"
           onClick={(e) => e.stopPropagation()}
+          loading="eager"
         />
       </div>
     </div>

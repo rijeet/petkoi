@@ -2,9 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { useMap, useMapEvents } from 'react-leaflet';
 import { reverseGeocode, forwardGeocode, autocompleteGeocode, type GeocodeResult } from '@/lib/geocoding';
-import { useMap, useMapEvents } from 'react-leaflet';
 
 // Types for Leaflet map and events
 interface LeafletMap {
@@ -43,27 +41,35 @@ const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
 });
 // Component to handle map click events and store map reference
 // Must be a child of MapContainer to use react-leaflet hooks
-function MapEventHandler({ 
-  onMapReady, 
-  onMapClick 
-}: { 
-  onMapReady: (map: LeafletMap) => void;
-  onMapClick: (e: LeafletMapClickEvent) => void;
-}) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (map) {
-      onMapReady(map);
-    }
-  }, [map, onMapReady]);
-  
-  useMapEvents({
-    click: onMapClick,
-  });
-  
-  return null;
-}
+// This component is dynamically imported to avoid SSR issues
+const MapEventHandler = dynamic(
+  () =>
+    import('react-leaflet').then((mod) => {
+      const { useMap, useMapEvents } = mod; // Import hooks inside the dynamically loaded component
+      return function MapEventHandlerInner({
+        onMapReady,
+        onMapClick,
+      }: {
+        onMapReady: (map: LeafletMap) => void;
+        onMapClick: (e: LeafletMapClickEvent) => void;
+      }) {
+        const map = useMap();
+
+        useEffect(() => {
+          if (map) {
+            onMapReady(map);
+          }
+        }, [map, onMapReady]);
+
+        useMapEvents({
+          click: onMapClick,
+        });
+
+        return null;
+      };
+    }),
+  { ssr: false } // Ensure this component is only rendered on the client side
+);
 
 // Leaflet CSS is imported in globals.css
 

@@ -10,7 +10,8 @@ interface ResponsiveImageProps {
   className?: string;
   containerClassName?: string;
   showModal?: boolean;
-  aspectRatio?: 'square' | 'landscape' | 'portrait' | 'auto';
+  aspectRatio?: 'square' | 'landscape' | 'portrait' | '4:5' | 'auto';
+  objectFit?: 'cover' | 'contain';
 }
 
 export default function ResponsiveImage({
@@ -20,6 +21,7 @@ export default function ResponsiveImage({
   containerClassName = '',
   showModal = true,
   aspectRatio = 'auto',
+  objectFit = 'cover',
 }: ResponsiveImageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -28,6 +30,7 @@ export default function ResponsiveImage({
     square: 'aspect-square',
     landscape: 'aspect-video',
     portrait: 'aspect-[3/4]',
+    '4:5': 'aspect-[4/5]',
     auto: '',
   };
 
@@ -46,7 +49,7 @@ export default function ResponsiveImage({
         width: size,
         height: size,
         aspectRatio: 'square',
-        crop: 'at_max', // Fit entire image within dimensions without cropping
+        crop: objectFit === 'cover' ? 'force' : 'at_max', // Use force for cover, at_max for contain
         quality: 85,
         format: 'auto',
       });
@@ -54,7 +57,7 @@ export default function ResponsiveImage({
       return transformImageKitUrl(src, {
         width: 800,
         aspectRatio: 'landscape',
-        crop: 'maintain_ratio',
+        crop: objectFit === 'cover' ? 'force' : 'maintain_ratio',
         quality: 85,
         format: 'auto',
       });
@@ -62,7 +65,24 @@ export default function ResponsiveImage({
       return transformImageKitUrl(src, {
         height: 600,
         aspectRatio: 'portrait',
-        crop: 'maintain_ratio',
+        crop: objectFit === 'cover' ? 'force' : 'maintain_ratio',
+        quality: 85,
+        format: 'auto',
+      });
+    } else if (aspectRatio === '4:5') {
+      // 4:5 aspect ratio for main profile images
+      let width = 400; // Default width
+      if (containerClassName?.includes('max-w-[500px]')) {
+        width = 500;
+      } else if (containerClassName?.includes('max-w-[600px]')) {
+        width = 600;
+      }
+      const height = Math.round(width * 1.25); // 4:5 ratio (height is 1.25x width)
+      
+      return transformImageKitUrl(src, {
+        width,
+        height,
+        crop: objectFit === 'cover' ? 'force' : 'at_max',
         quality: 85,
         format: 'auto',
       });
@@ -86,7 +106,7 @@ export default function ResponsiveImage({
         <img
           src={transformedSrc}
           alt={alt}
-          className={`w-full h-full ${aspectRatio === 'square' ? 'object-contain' : 'object-cover'} cursor-pointer transition-transform hover:scale-105 ${className}`}
+          className={`w-full h-full object-${objectFit} cursor-pointer transition-transform hover:scale-105 ${className}`}
           onClick={handleImageClick}
           onError={() => setImageError(true)}
           loading="lazy"
