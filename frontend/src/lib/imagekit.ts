@@ -8,7 +8,7 @@ export interface ImageKitTransformOptions {
   height?: number;
   quality?: number;
   format?: 'auto' | 'webp' | 'jpg' | 'png';
-  aspectRatio?: 'square' | 'landscape' | 'portrait';
+  aspectRatio?: 'square' | 'landscape' | 'portrait' | '4:5';
   crop?: 'maintain_ratio' | 'force' | 'at_least' | 'at_max';
 }
 
@@ -72,6 +72,15 @@ export function transformImageKitUrl(
           transformations.push(`w-${Math.round(height * 0.75)}`, `h-${height}`);
         } else {
           transformations.push('w-400', 'h-533');
+        }
+        break;
+      case '4:5':
+        if (width) {
+          transformations.push(`w-${width}`, `h-${Math.round(width * 1.25)}`); // 4:5 (height is 1.25x width)
+        } else if (height) {
+          transformations.push(`w-${Math.round(height * 0.8)}`, `h-${height}`); // 4:5 (width is 0.8x height)
+        } else {
+          transformations.push('w-400', 'h-500');
         }
         break;
     }

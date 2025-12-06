@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 export default function Navigation() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => pathname === path;
 
@@ -22,51 +24,84 @@ export default function Navigation() {
               href="/" 
               className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.8)] transition-all duration-300"
             >
-              Pet Identity
+              Pet Koi
             </Link>
             {isAuthenticated && (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard/pets"
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                    isActive('/dashboard/pets')
-                      ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
-                      : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                  }`}
+              <>
+                {/* Desktop Navigation Links */}
+                <div className="hidden lg:flex items-center gap-3">
+                  <Link
+                    href="/dashboard/pets"
+                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/pets')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    My Pets
+                  </Link>
+                  <Link
+                    href="/community"
+                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/community')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Community
+                  </Link>
+                  <Link
+                    href="/map"
+                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/map')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Map
+                  </Link>
+                  <Link
+                    href="/dashboard/profile"
+                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/profile')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Profile
+                  </Link>
+                </div>
+
+                {/* Mobile/Tablet Hamburger Menu Button */}
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="lg:hidden p-2 rounded-lg text-cyan-300 hover:text-white hover:bg-pink-500/20 transition-all duration-300"
+                  aria-label="Toggle menu"
                 >
-                  My Pets
-                </Link>
-                <Link
-                  href="/community"
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                    isActive('/community')
-                      ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
-                      : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                  }`}
-                >
-                  Community
-                </Link>
-                <Link
-                  href="/map"
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                    isActive('/map')
-                      ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
-                      : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                  }`}
-                >
-                  Map
-                </Link>
-                <Link
-                  href="/dashboard/profile"
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                    isActive('/dashboard/profile')
-                      ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
-                      : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                  }`}
-                >
-                  Profile
-                </Link>
-              </div>
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {mobileMenuOpen ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    ) : (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    )}
+                  </svg>
+                </button>
+              </>
             )}
           </div>
 
@@ -111,6 +146,58 @@ export default function Navigation() {
             )}
           </div>
         </div>
+
+        {/* Mobile/Tablet Menu Dropdown */}
+        {isAuthenticated && mobileMenuOpen && (
+          <div className="lg:hidden border-t border-pink-500/30 py-4 animate-in slide-in-from-top duration-300">
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/dashboard/pets"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  isActive('/dashboard/pets')
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                }`}
+              >
+                My Pets
+              </Link>
+              <Link
+                href="/community"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  isActive('/community')
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                }`}
+              >
+                Community
+              </Link>
+              <Link
+                href="/map"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  isActive('/map')
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                }`}
+              >
+                Map
+              </Link>
+              <Link
+                href="/dashboard/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  isActive('/dashboard/profile')
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                }`}
+              >
+                Profile
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

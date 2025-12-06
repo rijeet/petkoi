@@ -22,6 +22,9 @@ module.exports = {
           dark: '#fff',
         },
       },
+      fontFamily: {
+        jakarta: ['JakartaDisplay', 'sans-serif'],
+      },
     },
   },
   plugins: [],

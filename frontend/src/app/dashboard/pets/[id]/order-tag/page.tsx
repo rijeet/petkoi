@@ -5,13 +5,37 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
-import { QRCodeSVG } from 'qrcode.react';
 
+// Tag color configuration with front/back image URLs
 const TAG_COLORS = [
-  { value: 'GREEN', label: 'Green', hex: '#4CAF50' },
-  { value: 'PINK', label: 'Pink', hex: '#E91E63' },
-  { value: 'BLUE', label: 'Blue', hex: '#2196F3' },
-  { value: 'BLACK', label: 'Black', hex: '#212121' },
+  { 
+    value: 'PINK', 
+    label: 'Pink', 
+    hex: '#E91E63',
+    frontImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/pink_front.png',
+    backImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/pink_back.png'
+  },
+  { 
+    value: 'GREEN', 
+    label: 'Green', 
+    hex: '#4CAF50',
+    frontImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/green_front.png',
+    backImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/green_back.png'
+  },
+  { 
+    value: 'BLUE', 
+    label: 'Blue', 
+    hex: '#2196F3',
+    frontImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/blue_front.png?updatedAt=1765002001510',
+    backImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/blue_back.png'
+  },
+  { 
+    value: 'PURPLE', 
+    label: 'Purple', 
+    hex: '#9C27B0',
+    frontImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/purple_front.png',
+    backImage: 'https://ik.imagekit.io/3q7x0peae/Pet%20Public%20Img/purple_back.png'
+  },
 ] as const;
 
 interface Pet {
@@ -115,6 +139,14 @@ export default function OrderTagPage() {
   }
 
   const selectedColorData = TAG_COLORS.find((c) => c.value === selectedColor) || TAG_COLORS[0];
+  const currentPreviewImage = showBackSide ? selectedColorData.backImage : selectedColorData.frontImage;
+  const backTextColors: Record<string, string> = {
+    GREEN: '#88c912', // lighter lime for green tag
+    BLUE: '#5294af', // brighter navy for blue tag
+    PINK: '#db0874', // vivid raspberry for pink tag
+    PURPLE: '#712185', // rich purple for purple tag
+  };
+  const backTextColor = backTextColors[selectedColor] || '#3b2f0a';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-orange-50 p-8">
@@ -167,90 +199,60 @@ export default function OrderTagPage() {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Tag Preview</h2>
-                <button
-                  onClick={() => setShowBackSide(!showBackSide)}
-                  className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  {showBackSide ? 'Show Front' : 'Show Back'}
-                </button>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-6 flex items-center justify-center">
-                <div className="relative">
-                  {showBackSide ? (
-                    /* Back Side - Paw Print */
-                    <div
-                      className="w-64 h-64 rounded-full shadow-lg relative flex items-center justify-center"
-                      style={{
-                        border: `8px solid ${selectedColorData.hex}`,
-                        backgroundColor: '#FFFFFF',
-                      }}
-                    >
-                      {/* Inner white circle with thin black outline */}
-                      <div
-                        className="absolute inset-2 bg-white rounded-full flex items-center justify-center"
-                        style={{
-                          border: '2px solid #000000',
-                        }}
-                      >
-                        {/* Paw Print Icon */}
-                        <svg
-                          width="80"
-                          height="80"
-                          viewBox="0 0 100 100"
-                          fill="black"
-                          className="opacity-90"
-                        >
-                          {/* Main pad */}
-                          <circle cx="50" cy="65" r="18" />
-                          {/* Top left toe */}
-                          <circle cx="30" cy="40" r="12" />
-                          {/* Top right toe */}
-                          <circle cx="70" cy="40" r="12" />
-                          {/* Bottom left toe */}
-                          <circle cx="40" cy="75" r="10" />
-                          {/* Bottom right toe */}
-                          <circle cx="60" cy="75" r="10" />
-                        </svg>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Front Side - QR Code */
-                    <div
-                      className="w-64 h-64 rounded-full shadow-lg relative flex items-center justify-center"
-                      style={{
-                        border: `8px solid ${selectedColorData.hex}`,
-                        backgroundColor: '#FFFFFF',
-                      }}
-                    >
-                      {/* Inner white circle */}
-                      <div className="absolute inset-2 bg-white rounded-full flex flex-col items-center justify-center">
-                        {/* Top arc text - positioned at top */}
-                        <p className="text-[10px] font-bold text-black mt-2 mb-1 text-center">
-                          SCAN TO FIND MY FAMILY
-                        </p>
-
-                        {/* QR Code */}
-                        {pet.qrCodeUrl && (
-                          <div className="flex-1 flex items-center justify-center my-2">
-                            <div className="bg-white p-1 rounded">
-                              <QRCodeSVG value={pet.qrCodeUrl} size={120} />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Bottom arc text */}
-                        <p className="text-[9px] font-bold text-black mb-2 text-center">
-                          PETKOI.COM
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                <div className="inline-flex items-center rounded-full bg-gray-100 p-1 shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => setShowBackSide(false)}
+                    className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
+                      !showBackSide
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    Front
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowBackSide(true)}
+                    className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
+                      showBackSide
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                  >
+                    Back
+                  </button>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 text-center mt-2">
+              <div className="bg-gradient-to-br from-white via-gray-50 to-pink-50 rounded-2xl p-6 flex items-center justify-center shadow-lg border border-gray-100">
+                <div className="relative">
+                  <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-2xl bg-white shadow-xl ring-4 ring-white/70 overflow-hidden flex items-center justify-center">
+                    <img
+                      key={`${selectedColor}-${showBackSide ? 'back' : 'front'}`}
+                      src={currentPreviewImage}
+                      alt={`${selectedColorData.label} tag ${showBackSide ? 'back' : 'front'}`}
+                      className="w-full h-full object-contain transition-all duration-300"
+                      style={{ fontFamily: 'JakartaDisplay, sans-serif' }}
+                    />
+                  </div>
+                </div>
+                {showBackSide && (
+                  <div className="absolute inset-0 flex items-end justify-center pb-50 pointer-events-none translate-y-[-440px] translate-x-[210px]">
+                    <span
+                      className="text-4xl sm:text-4xl font-extrabold drop-shadow-md"
+                      style={{ fontFamily: 'JakartaDisplay, sans-serif', color: backTextColor }}
+                    >
+                      {pet.name}
+                    </span>
+                  </div>
+                     
+
+                )}
+              </div>
+              <p className="text-xs text-gray-500 text-center mt-3">
                 {showBackSide
-                  ? '* Back side with paw print icon'
-                  : '* Front side with QR code. Click "Show Back" to see the back side.'}
+                  ? '* Back side preview (pet name uses JakartaDisplay font).'
+                  : '* Front side with QR code. Tap Back to view the reverse.'}
               </p>
             </div>
           </div>

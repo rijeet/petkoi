@@ -4,7 +4,7 @@ import Navigation from '@/components/Navigation';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Pet Identity Platform',
+  title: 'Pet Koi',
   description: 'Track and manage your pet\'s identity, health, and location',
 };
 
