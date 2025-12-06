@@ -237,7 +237,7 @@ export default function OrderTagPage() {
                   </div>
                 </div>
                 {showBackSide && (
-                  <div className="absolute inset-0 flex items-end justify-center pb-50 pointer-events-none translate-y-[-440px] translate-x-[210px]">
+                  <div className="absolute inset-0 flex items-end justify-center pb-50 pointer-events-none translate-y-[-690px] translate-x-[210px]">
                     <span
                       className="text-4xl sm:text-4xl font-extrabold drop-shadow-md"
                       style={{ fontFamily: 'JakartaDisplay, sans-serif', color: backTextColor }}
