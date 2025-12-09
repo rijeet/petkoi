@@ -14,6 +14,8 @@ interface User {
   longitude?: number;
   geohash?: string;
   address?: string;
+  phone?: string;
+  homeAddress?: string;
 }
 
 export function useAuth() {
@@ -72,11 +74,15 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('auth_token');
-    apiClient.setToken(null);
-    setUser(null);
-    router.push('/auth/signin');
+  const logout = async () => {
+    try {
+      await apiClient.logout();
+    } finally {
+      localStorage.removeItem('auth_token');
+      apiClient.setToken(null);
+      setUser(null);
+      router.push('/auth/signin');
+    }
   };
 
   return {

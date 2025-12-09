@@ -100,6 +100,7 @@ export class NotificationService {
     address?: string,
     note?: string,
     imageUrl?: string,
+    phone?: string,
   ): Promise<void> {
     const pet = await this.prisma.pet.findUnique({
       where: { id: petId },
@@ -143,6 +144,9 @@ export class NotificationService {
     }
     if (imageUrl) {
       notificationPayload.imageUrl = imageUrl;
+    }
+    if (phone) {
+      notificationPayload.phone = phone;
     }
 
     console.log(`Creating notification for ${pet.name}:`, {

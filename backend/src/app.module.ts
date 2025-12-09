@@ -11,6 +11,7 @@ import { CommunityModule } from './APP.API/community/community.module';
 import { DirectoryModule } from './APP.API/directory/directory.module';
 import { HealthModule } from './APP.API/health/health.module';
 import { PetTagsModule } from './APP.API/pet-tags/pet-tags.module';
+import { AdminAuthModule } from './APP.API/admin-auth/admin-auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PetTagsModule } from './APP.API/pet-tags/pet-tags.module';
     }),
     PrismaModule,
     AuthModule,
+    AdminAuthModule,
     UsersModule,
     PetsModule,
     PetImagesModule,

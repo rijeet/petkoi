@@ -15,16 +15,30 @@ export class AuthJwtService {
     private configService: ConfigService,
   ) {}
 
-  async generateToken(payload: JwtPayload): Promise<string> {
+  private getAccessTokenExpiry(): string {
+    // Default to 15 minutes; fallback to legacy env if provided
+    return (
+      this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
+      this.configService.get<string>('JWT_EXPIRES_IN') ||
+      '15m'
+    );
+  }
+
+  async generateAccessToken(payload: JwtPayload): Promise<string> {
     const secret = this.configService.get<string>('JWT_SECRET');
     if (!secret) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN', '7d');
+    const expiresIn = this.getAccessTokenExpiry();
     return this.jwtService.signAsync(payload, {
       secret,
       expiresIn,
     } as any);
+  }
+
+  // Backward compatibility
+  async generateToken(payload: JwtPayload): Promise<string> {
+    return this.generateAccessToken(payload);
   }
 
   async verifyToken(token: string): Promise<JwtPayload> {

@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
+import { IsEmail, IsString, IsOptional, IsEnum, IsNumber, Matches } from 'class-validator';
 import { Role } from '@prisma/client';
 
 export class CreateUserDto {
@@ -8,6 +8,10 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @IsString()
+  @IsOptional()
+  homeAddress?: string;
 
   @IsString()
   @IsOptional()
@@ -25,6 +29,13 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
+  homeAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^(?:\+?88)?01[3-9]\d{8}$/, {
+    message: 'Phone must be a valid Bangladesh number (01XXXXXXXXX or +8801XXXXXXXXX)',
+  })
   phone?: string;
 
   @IsString()
@@ -56,6 +67,7 @@ export class UserResponseDto {
   id!: string;
   email!: string;
   name?: string;
+  homeAddress?: string;
   role!: Role;
   createdAt!: Date;
   updatedAt!: Date;

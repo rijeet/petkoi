@@ -9,9 +9,11 @@ import { AuthJwtService } from '../../APP.Infrastructure/auth/jwt.service';
 import { JwtStrategy } from '../../APP.Infrastructure/auth/jwt.strategy';
 import { GoogleStrategy } from '../../APP.Infrastructure/auth/google.strategy';
 import { PrismaModule } from '../../APP.Infrastructure/prisma/prisma.module';
+import { AuthSessionService } from '../../APP.BLL/services/auth-session.service';
 
 @Module({
   imports: [
+    ConfigModule,
     PrismaModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -33,7 +35,14 @@ import { PrismaModule } from '../../APP.Infrastructure/prisma/prisma.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, AuthJwtService, JwtStrategy, GoogleStrategy],
+  providers: [
+    AuthService,
+    UserService,
+    AuthJwtService,
+    JwtStrategy,
+    GoogleStrategy,
+    AuthSessionService,
+  ],
   exports: [AuthService, AuthJwtService],
 })
 export class AuthModule {}

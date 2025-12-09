@@ -3,6 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 export class ApiClient {
   private baseUrl: string;
   private token: string | null = null;
+  private refreshPromise: Promise<void> | null = null;
 
   constructor(baseUrl: string = API_URL) {
     this.baseUrl = baseUrl;
@@ -12,10 +13,43 @@ export class ApiClient {
     this.token = token;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<T> {
+  private async refreshAccessToken(): Promise<void> {
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.refreshPromise = (async () => {
+      const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const err = new Error('Failed to refresh session');
+        (err as any).status = response.status;
+        throw err;
+      }
+
+      const data = await response.json();
+      const accessToken = data?.accessToken as string | undefined;
+      if (!accessToken) {
+        throw new Error('No access token returned from refresh');
+      }
+
+      this.token = accessToken;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', accessToken);
+      }
+    })();
+
+    try {
+      await this.refreshPromise;
+    } finally {
+      this.refreshPromise = null;
+    }
+  }
+
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -26,42 +60,73 @@ export class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const execute = async (): Promise<T> => {
+      const response = await fetch(url, {
+        ...options,
+        headers,
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      let errorMessage = `HTTP error! status: ${response.status}`;
-      try {
-        const error = await response.json();
-        errorMessage = error.message || error.error || errorMessage;
-      } catch {
-        errorMessage = response.statusText || errorMessage;
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const error = await response.json();
+          errorMessage = error.message || error.error || errorMessage;
+        } catch {
+        try {
+          const txt = await response.text();
+          if (txt) {
+            errorMessage = txt;
+          } else {
+            errorMessage = response.statusText || errorMessage;
+          }
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+        }
+        const error = new Error(errorMessage);
+        (error as any).status = response.status;
+        throw error;
       }
-      const error = new Error(errorMessage);
-      (error as any).status = response.status;
-      throw error;
-    }
 
-    // Handle 204 No Content (DELETE operations)
-    if (response.status === 204) {
+      if (response.status === 204) {
+        return null as T;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      }
+
       return null as T;
-    }
+    };
 
-    // Check if response has content to parse
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return response.json();
+    let attemptedRefresh = false;
+    try {
+      return await execute();
+    } catch (err: any) {
+      if (!attemptedRefresh && err?.status === 401) {
+        attemptedRefresh = true;
+        await this.refreshAccessToken();
+        return execute();
+      }
+      throw err;
     }
-
-    // Return null for empty responses
-    return null as T;
   }
 
   // Auth
   async googleAuth() {
     window.location.href = `${this.baseUrl}/auth/google`;
+  }
+
+  async logout() {
+    await fetch(`${this.baseUrl}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    }).catch(() => {
+      // swallow errors to allow client-side cleanup regardless
+    });
   }
 
   // Users
@@ -226,13 +291,43 @@ export class ApiClient {
     petId: string,
     lat: number,
     lng: number,
-    address?: string,
+    address: string,
     note?: string,
     imageUrl?: string,
+    phone?: string,
   ) {
     return this.request(`/pets/${petId}/found`, {
       method: 'POST',
-      body: JSON.stringify({ lat, lng, address, note, imageUrl }),
+      body: JSON.stringify({ lat, lng, address, note, imageUrl, phone }),
+    });
+  }
+
+  // Admin auth
+  async adminLogin(email: string, password: string) {
+    return this.request<{ otpToken: string }>('/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  async adminVerify(otpToken: string, code: string) {
+    return this.request<{ accessToken: string; role: string; expiresIn: number }>('/admin/login/verify', {
+      method: 'POST',
+      body: JSON.stringify({ otpToken, code }),
+    });
+  }
+
+  async adminLogout() {
+    await this.request('/admin/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+  }
+
+  async adminResendOtp(otpToken: string) {
+    return this.request('/admin/login/resend', {
+      method: 'POST',
+      body: JSON.stringify({ otpToken }),
     });
   }
 

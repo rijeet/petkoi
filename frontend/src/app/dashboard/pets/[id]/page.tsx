@@ -62,6 +62,7 @@ export default function PetDetailPage() {
   const [imageFitMode, setImageFitMode] = useState<'cover' | 'contain'>('cover');
   const isOwner = pet?.owner?.id === user?.id;
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const missingContactInfo = isOwner && (!user?.phone || !user?.homeAddress);
 
   useEffect(() => {
     loadPet();
@@ -144,6 +145,11 @@ export default function PetDetailPage() {
 
   const toggleLostStatus = async () => {
     if (!pet) return;
+    if (missingContactInfo) {
+      alert('Add your phone number and home address in Profile before marking your pet as lost.');
+      router.push('/dashboard/profile');
+      return;
+    }
 
     try {
       const token = localStorage.getItem('auth_token');
@@ -281,14 +287,20 @@ export default function PetDetailPage() {
             <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-6 shadow-lg space-y-4">
               <button
                 onClick={toggleLostStatus}
+                disabled={missingContactInfo}
                 className={`w-full px-6 py-3.5 rounded-full transition-all flex items-center justify-center text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] ${
                   pet.isLost
                     ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
                     : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white hover:from-yellow-600 hover:to-yellow-700'
-                }`}
+                } ${missingContactInfo ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {pet.isLost ? '✓ Mark as Found' : '⚠️ Mark as Lost'}
               </button>
+              {missingContactInfo && (
+                <p className="text-xs text-red-600 font-medium">
+                  Please add your phone number and home address in Profile to mark your pet as lost.
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 {isOwner && (
                   <Link
@@ -473,40 +485,25 @@ export default function PetDetailPage() {
                               </div>
                               {notif.payload?.foundLocation && (
                                 <div className="mt-2 space-y-3 text-sm text-gray-700">
-                                  {/* GPS Coordinates */}
+                                  {/* Address & phone only */}
                                   <div className="p-3 bg-gray-50 rounded-lg">
                                     <p className="font-medium text-gray-900 mb-2">📍 Location</p>
                                     <div className="space-y-2">
-                                      <p>
-                                        <span className="font-medium">Coordinates:</span>{' '}
-                                        <a
-                                          href={`https://www.google.com/maps?q=${notif.payload.foundLocation.lat},${notif.payload.foundLocation.lng}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-pink-500 hover:underline font-mono"
-                                        >
-                                          {typeof notif.payload.foundLocation.lat === 'number'
-                                            ? notif.payload.foundLocation.lat.toFixed(6)
-                                            : parseFloat(String(notif.payload.foundLocation.lat)).toFixed(6)}
-                                          ,{' '}
-                                          {typeof notif.payload.foundLocation.lng === 'number'
-                                            ? notif.payload.foundLocation.lng.toFixed(6)
-                                            : parseFloat(String(notif.payload.foundLocation.lng)).toFixed(6)}
-                                        </a>
-                                        {' '}
-                                        <span className="text-gray-500 text-xs">(Click to open map)</span>
-                                      </p>
-                                      {notif.payload.foundLocation.geohash && (
-                                        <p>
-                                          <span className="font-medium">Geohash:</span>{' '}
-                                          <span className="font-mono text-gray-600">{notif.payload.foundLocation.geohash}</span>
-                                          <span className="text-gray-500 text-xs ml-2">(~150m accuracy)</span>
-                                        </p>
-                                      )}
                                       {notif.payload.address && (
                                         <p>
                                           <span className="font-medium">Address:</span>{' '}
                                           <span className="text-gray-800">{notif.payload.address}</span>
+                                        </p>
+                                      )}
+                                      {notif.payload.phone && (
+                                        <p>
+                                          <span className="font-medium">Phone:</span>{' '}
+                                          <a
+                                            href={`tel:${notif.payload.phone}`}
+                                            className="text-pink-500 hover:underline font-medium"
+                                          >
+                                            {notif.payload.phone}
+                                          </a>
                                         </p>
                                       )}
                                     </div>

@@ -25,6 +25,7 @@ interface Pet {
     name?: string;
     email?: string;
     phone?: string;
+    homeAddress?: string;
   };
 }
 
@@ -37,6 +38,7 @@ export default function PublicPetPage() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [address, setAddress] = useState('');
   const [note, setNote] = useState('');
+  const [phone, setPhone] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -118,6 +120,21 @@ export default function PublicPetPage() {
   const handleSendLocation = async () => {
     if (!pet) return;
 
+    const cleanedAddress = address.trim();
+    const cleanedNote = note.trim();
+    const cleanedPhone = phone.trim();
+
+    // Require address and Bangladesh phone number
+    const bdPhoneRegex = /^(?:\+8801\d{9}|01\d{9})$/;
+    if (!cleanedAddress) {
+      setLocationError('Location address is required to report a found pet.');
+      return;
+    }
+    if (!bdPhoneRegex.test(cleanedPhone)) {
+      setLocationError('Provide a valid Bangladesh phone number (01XXXXXXXXX or +8801XXXXXXXXX).');
+      return;
+    }
+
     setSendingLocation(true);
     setLocationError(null);
 
@@ -144,8 +161,9 @@ export default function PublicPetPage() {
             const reportData = {
               lat: latitude,
               lng: longitude,
-              address: address.trim() || undefined,
-              note: note.trim() || undefined,
+              address: cleanedAddress,
+              note: cleanedNote || undefined,
+              phone: cleanedPhone,
               imageUrl,
             };
             console.log('Sending report with:', reportData);
@@ -157,9 +175,10 @@ export default function PublicPetPage() {
               pet.id,
               latitude,
               longitude,
-              address.trim() || undefined,
-              note.trim() || undefined,
+              cleanedAddress,
+              cleanedNote || undefined,
               imageUrl,
+              cleanedPhone,
             );
             
             console.log('Report sent successfully');
@@ -168,6 +187,7 @@ export default function PublicPetPage() {
             // Reset form
             setAddress('');
             setNote('');
+            setPhone('');
             setImageFile(null);
             setImagePreview(null);
             // Show success message
@@ -321,6 +341,11 @@ export default function PublicPetPage() {
                         </a>
                       </p>
                     )}
+                    {pet.owner.homeAddress && (
+                      <p className="text-gray-700">
+                        <span className="font-medium">Home Address:</span> {pet.owner.homeAddress}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -339,10 +364,10 @@ export default function PublicPetPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* Address Field */}
+                    {/* Address Field (required) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Location Address (Optional)
+                        Location Address (required)
                       </label>
                       <input
                         type="text"
@@ -350,13 +375,29 @@ export default function PublicPetPage() {
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="e.g., 123 Main Street, City, State"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    {/* Phone Field (required) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Your Phone (BD only, required)
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        required
                       />
                     </div>
 
                     {/* Note Field */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Additional Note (Optional)
+                        Additional Note (optional)
                       </label>
                       <textarea
                         value={note}

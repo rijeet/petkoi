@@ -28,6 +28,7 @@ model User {
   longitude        Float?
   geohash          String?
   address          String?
+  homeAddress      String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   pets                    Pet[]                @relation("OwnerPets")
@@ -37,9 +38,81 @@ model User {
   communityPosts   CommunityPost[]
   communityComments CommunityComment[]
   petTagOrders            PetTagOrder[]
+  sessions         UserSession[]
 
   @@index([geohash])
   @@map("users")
+}
+
+model UserSession {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ORDER_TRACKER
+  LOST_PET
+  ADOPTION
+  HEALTH
+}
+
+model AdminUser {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  role          AdminRole
+  otpFailedCount Int           @default(0)
+  otpLockedUntil DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sessions      AdminSession[]
+  otps          AdminOtp[]
+
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id               String   @id @default(uuid())
+  adminId          String
+  admin            AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  refreshTokenHash String
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([adminId])
+  @@map("admin_sessions")
+}
+
+model AdminOtp {
+  id          String    @id @default(uuid())
+  adminId     String
+  admin       AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  codeHash    String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  attempts    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([adminId])
+  @@index([expiresAt])
+  @@map("admin_otps")
 }
 
 model Pet {

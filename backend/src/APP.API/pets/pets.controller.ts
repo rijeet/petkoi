@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PetService } from '../../APP.BLL/services/pet.service';
@@ -104,11 +105,30 @@ export class PetsController {
   @HttpCode(HttpStatus.OK)
   async reportFound(
     @Param('id') id: string,
-    @Body() body: { lat: number; lng: number; address?: string; note?: string; imageUrl?: string },
+    @Body() body: { lat: number; lng: number; address?: string; note?: string; imageUrl?: string; phone?: string },
   ) {
+    if (!body.address) {
+      throw new BadRequestException('Address is required when reporting a found pet.');
+    }
+    if (!body.phone) {
+      throw new BadRequestException('Phone number is required when reporting a found pet.');
+    }
+    const bdPhoneRegex = /^(?:\+8801\d{9}|01\d{9})$/;
+    if (!bdPhoneRegex.test(body.phone)) {
+      throw new BadRequestException('Phone must be a valid Bangladesh number (01XXXXXXXXX or +8801XXXXXXXXX).');
+    }
+
     // This endpoint is public - anyone can report finding a lost pet
     // The notification service will handle notifying the owner
-    return this.petService.reportFound(id, body.lat, body.lng, body.address, body.note, body.imageUrl);
+    return this.petService.reportFound(
+      id,
+      body.lat,
+      body.lng,
+      body.address,
+      body.note,
+      body.imageUrl,
+      body.phone,
+    );
   }
 }
 

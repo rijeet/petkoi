@@ -163,6 +163,7 @@ export class PetService {
             name: true,
             email: true,
             phone: true, // Phone included - frontend will conditionally display based on isLost
+            homeAddress: true,
           },
         },
         images: true,
@@ -179,6 +180,7 @@ export class PetService {
         ...pet.owner,
         email: null as any,
         phone: null as any,
+        homeAddress: null as any,
       };
     }
 
@@ -201,6 +203,7 @@ export class PetService {
     address?: string,
     note?: string,
     imageUrl?: string,
+    phone?: string,
   ): Promise<{ success: boolean }> {
     const pet = await this.findById(petId);
     if (!pet) {
@@ -208,7 +211,7 @@ export class PetService {
     }
 
     // Record the found location with address and image
-    await this.notificationService.notifyPetFound(petId, { lat, lng }, address, note, imageUrl);
+    await this.notificationService.notifyPetFound(petId, { lat, lng }, address, note, imageUrl, phone);
 
     return { success: true };
   }
