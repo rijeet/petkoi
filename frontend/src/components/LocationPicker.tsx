@@ -283,7 +283,7 @@ export default function LocationPicker({
     setLocation({ lat: result.lat, lng: result.lng });
     setAddress(result.address);
     setIsAutoDetected(false);
-    setSearchQuery('');
+    setSearchQuery(result.displayName);
     setSearchResults([]);
     setAutocompleteResults([]);
     setShowAutocomplete(false);
@@ -550,34 +550,12 @@ export default function LocationPicker({
         </MapContainer>
       </div>
 
-      {/* Address Field */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Address
-        </label>
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Address will be auto-filled"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
-        {isLoading && (
-          <p className="mt-1 text-xs text-gray-500">Updating address...</p>
-        )}
-      </div>
-
       {/* Error Message */}
       {error && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
-
-      {/* Coordinates Display */}
-      <div className="mt-2 text-xs text-gray-500">
-        Coordinates: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-      </div>
     </div>
   );
 }

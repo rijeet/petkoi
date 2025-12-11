@@ -17,6 +17,7 @@ interface UserProfile {
   latitude?: number;
   longitude?: number;
   address?: string;
+  homeAddress?: string;
 }
 
 export default function ProfilePage() {
@@ -30,6 +31,7 @@ export default function ProfilePage() {
     name: '',
     phone: '',
     profilePicture: '',
+    homeAddress: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -60,6 +62,7 @@ export default function ProfilePage() {
         name: userData.name || '',
         phone: userData.phone || '',
         profilePicture: userData.profilePicture || '',
+        homeAddress: userData.homeAddress || '',
       });
     } catch (error: unknown) {
       console.error('Failed to load profile:', error);
@@ -97,6 +100,7 @@ export default function ProfilePage() {
         name: profile.name || '',
         phone: profile.phone || '',
         profilePicture: profile.profilePicture || '',
+        homeAddress: profile.homeAddress || '',
       });
     }
     setEditing(false);
@@ -276,28 +280,49 @@ export default function ProfilePage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Location
               </label>
-              <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                {profile.address ? (
-                  <div>
-                    <p className="text-gray-800">{profile.address}</p>
-                    {profile.latitude && profile.longitude && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Coordinates: {profile.latitude.toFixed(6)}, {profile.longitude.toFixed(6)}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-gray-400">Not set</span>
-                )}
-              </div>
-              <div className="mt-2">
+              <p className="text-xs text-gray-500 mb-2">
+                Use this for GPS/area updates; it keeps map features accurate.
+              </p>
+              <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between">
+                <span className="text-gray-600">
+                  {profile.address || (profile.latitude != null && profile.longitude != null)
+                    ? 'Location saved'
+                    : 'Not set'}
+                </span>
                 <Link
                   href="/dashboard/confirm-location"
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-800 underline"
                 >
-                  {profile.address ? 'Update Location' : 'Set Location'}
+                  {profile.address || (profile.latitude != null && profile.longitude != null)
+                    ? 'Update'
+                    : 'Set location'}
                 </Link>
               </div>
+            </div>
+
+            {/* Home Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Home Address
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Provide this to help recovery efforts if your pet is lost.
+              </p>
+              {editing ? (
+                <input
+                  type="text"
+                  value={formData.homeAddress}
+                  onChange={(e) => setFormData({ ...formData, homeAddress: e.target.value })}
+                  placeholder="Enter your home address"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
+                />
+              ) : (
+                <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between">
+                  <span className="text-gray-600">
+                    {profile.homeAddress ? profile.homeAddress : 'Not set'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

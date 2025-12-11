@@ -224,9 +224,9 @@ export default function OrderTagPage() {
                   </button>
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-white via-gray-50 to-pink-50 rounded-2xl p-6 flex items-center justify-center shadow-lg border border-gray-100">
-                <div className="relative">
-                  <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-2xl bg-white shadow-xl ring-4 ring-white/70 overflow-hidden flex items-center justify-center">
+            <div className="bg-gradient-to-br from-white via-gray-50 to-pink-50 rounded-2xl p-6 flex items-center justify-center shadow-lg border border-gray-100 relative">
+              <div className="relative">
+                <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-2xl bg-white shadow-xl ring-4 ring-white/70 overflow-hidden flex items-center justify-center">
                     <img
                       key={`${selectedColor}-${showBackSide ? 'back' : 'front'}`}
                       src={currentPreviewImage}
@@ -236,18 +236,16 @@ export default function OrderTagPage() {
                     />
                   </div>
                 </div>
-                {showBackSide && (
-                  <div className="absolute inset-0 flex items-end justify-center pb-50 pointer-events-none translate-y-[-690px] translate-x-[210px]">
-                    <span
-                      className="text-4xl sm:text-4xl font-extrabold drop-shadow-md"
-                      style={{ fontFamily: 'JakartaDisplay, sans-serif', color: backTextColor }}
-                    >
-                      {pet.name}
-                    </span>
-                  </div>
-                     
-
-                )}
+              {showBackSide && (
+                <div className="absolute inset-0 flex items-end justify-center pb-50 pointer-events-none translate-y-[-150px] translate-x-[0px]">
+                  <span
+                    className="text-4xl sm:text-4xl font-extrabold drop-shadow-md tracking-widest"
+                    style={{ fontFamily: 'JakartaDisplay, sans-serif', color: backTextColor }}
+                  >
+                    {pet.name}
+                  </span>
+                </div>
+              )}
               </div>
               <p className="text-xs text-gray-500 text-center mt-3">
                 {showBackSide
