@@ -19,9 +19,8 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-# Use npm ci if package-lock.json exists, otherwise use npm install
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+# Install dependencies (use install to avoid ci lockfile strictness in workspace)
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -52,13 +51,8 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install production dependencies only
-# Use npm ci if package-lock.json exists, otherwise use npm install
 # Note: canvas will be copied from builder stage, so we skip its install script
-RUN if [ -f package-lock.json ]; then \
-      npm ci --only=production --ignore-scripts; \
-    else \
-      npm install --only=production --ignore-scripts; \
-    fi
+RUN npm install --only=production --ignore-scripts
 
 # Copy built application and Prisma files
 COPY --from=builder /app/dist ./dist
