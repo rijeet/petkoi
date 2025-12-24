@@ -17,44 +17,52 @@ datasource db {
 // Domain Models - APP.Entity Layer
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
-  name             String?
-  phone            String?
-  profilePicture   String?
-  role             Role      @default(USER)
-  googleId         String?   @unique
-  latitude         Float?
-  longitude        Float?
-  geohash          String?
-  address          String?
-  homeAddress      String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  pets                    Pet[]                @relation("OwnerPets")
-  previousOwnershipHistory OwnershipHistory[]  @relation("PreviousOwnership")
-  newOwnershipHistory      OwnershipHistory[]  @relation("NewOwnership")
-  notifications           Notification[]
-  communityPosts   CommunityPost[]
-  communityComments CommunityComment[]
-  petTagOrders            PetTagOrder[]
-  sessions         UserSession[]
+  id                       String             @id @default(uuid())
+  email                    String             @unique
+  name                     String?
+  phone                    String?
+  profilePicture           String?
+  role                     Role               @default(USER)
+  googleId                 String?            @unique
+  latitude                 Float?
+  longitude                Float?
+  geohash                  String?
+  address                  String?
+  homeAddress              String?
+  addressLine              String?
+  landmark                 String?
+  zone                     String?
+  city                     String?
+  district                 String?
+  postalCode               String?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  pets                     Pet[]              @relation("OwnerPets")
+  previousOwnershipHistory OwnershipHistory[] @relation("PreviousOwnership")
+  newOwnershipHistory      OwnershipHistory[] @relation("NewOwnership")
+  notifications            Notification[]
+  communityPosts           CommunityPost[]
+  communityComments        CommunityComment[]
+  petTagOrders             PetTagOrder[]
+  sessions                 UserSession[]
+  orders                   Order[]
+  manualPayments           ManualPayment[]
 
   @@index([geohash])
   @@map("users")
 }
 
 model UserSession {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   userId           String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   refreshTokenHash String
   expiresAt        DateTime
   revokedAt        DateTime?
   ipAddress        String?
   userAgent        String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([userId])
   @@map("user_sessions")
@@ -69,22 +77,22 @@ enum AdminRole {
 }
 
 model AdminUser {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String
-  role          AdminRole
-  otpFailedCount Int           @default(0)
+  id             String         @id @default(uuid())
+  email          String         @unique
+  passwordHash   String
+  role           AdminRole
+  otpFailedCount Int            @default(0)
   otpLockedUntil DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  sessions      AdminSession[]
-  otps          AdminOtp[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  sessions       AdminSession[]
+  otps           AdminOtp[]
 
   @@map("admin_users")
 }
 
 model AdminSession {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   adminId          String
   admin            AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
   refreshTokenHash String
@@ -92,23 +100,23 @@ model AdminSession {
   revokedAt        DateTime?
   ipAddress        String?
   userAgent        String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([adminId])
   @@map("admin_sessions")
 }
 
 model AdminOtp {
-  id          String    @id @default(uuid())
-  adminId     String
-  admin       AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  codeHash    String
-  expiresAt   DateTime
-  consumedAt  DateTime?
-  attempts    Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id         String    @id @default(uuid())
+  adminId    String
+  admin      AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   @@index([adminId])
   @@index([expiresAt])
@@ -116,7 +124,7 @@ model AdminOtp {
 }
 
 model Pet {
-  id           String    @id @default(uuid())
+  id           String               @id @default(uuid())
   name         String
   breed        String?
   color        String?
@@ -126,9 +134,9 @@ model Pet {
   description  String?
   type         PetType
   qrCodeUrl    String?
-  isLost       Boolean   @default(false)
+  isLost       Boolean              @default(false)
   ownerId      String?
-  owner        User?     @relation("OwnerPets", fields: [ownerId], references: [id])
+  owner        User?                @relation("OwnerPets", fields: [ownerId], references: [id])
   images       PetImage[]
   vaccines     Vaccine[]
   family       PetFamily[]
@@ -136,8 +144,9 @@ model Pet {
   gpsHistory   GPSLocationHistory[]
   qrScans      QRScanLog[]
   petTagOrders PetTagOrder[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  orders       Order[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
   @@index([ownerId])
   @@index([isLost])
@@ -161,16 +170,16 @@ model PetImage {
 }
 
 model Vaccine {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   petId         String
-  pet           Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  pet           Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
   name          String
   doseNumber    Int?
   clinic        String?
   injectionDate DateTime
   nextDueDate   DateTime?
   extractedMeta Json?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
 
   @@index([petId])
   @@index([nextDueDate])
@@ -178,11 +187,11 @@ model Vaccine {
 }
 
 model PetFamily {
-  id         String       @id @default(uuid())
-  petId      String
-  pet        Pet          @relation(fields: [petId], references: [id], onDelete: Cascade)
-  parentId   String?
-  relation   RelationType
+  id       String       @id @default(uuid())
+  petId    String
+  pet      Pet          @relation(fields: [petId], references: [id], onDelete: Cascade)
+  parentId String?
+  relation RelationType
 
   @@index([petId])
   @@map("pet_family")
@@ -206,18 +215,18 @@ model OwnershipHistory {
 }
 
 model CommunityPost {
-  id         String   @id @default(uuid())
-  authorId   String
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  title      String
-  body       String
-  imageUrl   String?
-  location   Json?
-  tags       String[]
-  upvotes    Int      @default(0)
-  downvotes  Int      @default(0)
-  createdAt  DateTime @default(now())
-  comments   CommunityComment[]
+  id        String             @id @default(uuid())
+  authorId  String
+  author    User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  imageUrl  String?
+  location  Json?
+  tags      String[]
+  upvotes   Int                @default(0)
+  downvotes Int                @default(0)
+  createdAt DateTime           @default(now())
+  comments  CommunityComment[]
 
   @@index([authorId])
   @@index([createdAt])
@@ -225,14 +234,14 @@ model CommunityPost {
 }
 
 model CommunityComment {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   postId    String
   post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content   String
   parentId  String?
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
 
   @@index([postId])
   @@index([authorId])
@@ -240,7 +249,7 @@ model CommunityComment {
 }
 
 model Guard {
-  id        String @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   phone     String
   address   String
@@ -250,7 +259,7 @@ model Guard {
 }
 
 model WasteCollector {
-  id        String @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   phone     String
   ward      String
@@ -260,13 +269,13 @@ model WasteCollector {
 }
 
 model Notification {
-  id          String           @id @default(uuid())
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        NotificationType
-  payload     Json
-  read        Boolean          @default(false)
-  createdAt   DateTime         @default(now())
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  payload   Json
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
   @@index([userId])
   @@index([read])
@@ -275,12 +284,12 @@ model Notification {
 }
 
 model QRScanLog {
-  id              String  @id @default(uuid())
-  petId           String?
-  pet             Pet?    @relation(fields: [petId], references: [id], onDelete: SetNull)
-  scannerIp       String?
+  id               String   @id @default(uuid())
+  petId            String?
+  pet              Pet?     @relation(fields: [petId], references: [id], onDelete: SetNull)
+  scannerIp        String?
   scannerUserAgent String?
-  createdAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
 
   @@index([petId])
   @@index([createdAt])
@@ -288,9 +297,9 @@ model QRScanLog {
 }
 
 model GPSLocationHistory {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   petId      String
-  pet        Pet     @relation(fields: [petId], references: [id], onDelete: Cascade)
+  pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   lat        Float
   lng        Float
   geohash    String
@@ -344,19 +353,19 @@ enum PetTagOrderStatus {
 }
 
 model PetTagOrder {
-  id            String            @id @default(uuid())
-  petId         String
-  userId        String
-  qrUrl         String            // QR code URL from pet profile
-  tagColor      String            // Green, Pink, Blue, Black
-  tagSize       String            @default("32mm")
-  previewUrl    String?           // Rendered tag preview image URL
-  status        PetTagOrderStatus  @default(PENDING)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id         String            @id @default(uuid())
+  petId      String
+  userId     String
+  qrUrl      String // QR code URL from pet profile
+  tagColor   String // Green, Pink, Blue, Black
+  tagSize    String            @default("32mm")
+  previewUrl String? // Rendered tag preview image URL
+  status     PetTagOrderStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 
-  pet    Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pet  Pet  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([petId])
   @@index([userId])
@@ -365,3 +374,228 @@ model PetTagOrder {
   @@map("pet_tag_orders")
 }
 
+// Commerce Models
+
+enum OrderStatus {
+  PENDING
+
+  FAILED
+  CANCELLED
+  EXPIRED
+  ORDER_PLACED
+  PAYMENT_UNDER_REVIEW
+  PAYMENT_VERIFIED
+  ORDER_PACKED
+  SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+}
+
+enum PaymentProvider {
+  SSLCOMMERZ
+}
+
+enum PaymentStatus {
+  CREATED
+  REDIRECTED
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum ManualPaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ManualPaymentMethod {
+  BKASH
+  NAGAD
+  ROCKET
+  BANK
+  PAYPAL
+  OTHER
+}
+
+model Product {
+  id              String                  @id @default(uuid())
+  name            String
+  sku             String                  @unique
+  priceBDT        Int
+  weightGrams     Int
+  longestSideCm   Int?
+  active          Boolean                 @default(true)
+  shippingProfile ProductShippingProfile?
+  orderItems      OrderItem[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@map("products")
+}
+
+model ShippingCategory {
+  id                     String                   @id @default(uuid())
+  name                   String                   @unique
+  extraFlatBDT           Int                      @default(0)
+  longestSideThresholdCm Int?
+  isFragile              Boolean                  @default(false)
+  profiles               ProductShippingProfile[]
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+
+  @@map("shipping_categories")
+}
+
+model ProductShippingProfile {
+  id                    String            @id @default(uuid())
+  productId             String            @unique
+  product               Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  weightGrams           Int
+  volumetricWeightGrams Int?
+  longestSideCm         Int?
+  shippingCategoryId    String?
+  shippingCategory      ShippingCategory? @relation(fields: [shippingCategoryId], references: [id], onDelete: SetNull)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@map("product_shipping_profiles")
+}
+
+model ShippingZone {
+  id               String                     @id @default(uuid())
+  name             String
+  code             String?                    @unique
+  baseFeeBDT       Int
+  perKgFeeBDT      Int
+  freeThresholdBDT Int?
+  isHomeDelivery   Boolean                    @default(true)
+  postalPrefixes   ShippingZonePostalPrefix[]
+  districts        ShippingZoneDistrict[]
+  orders           Order[]
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+
+  @@map("shipping_zones")
+}
+
+model ShippingZonePostalPrefix {
+  id     String       @id @default(uuid())
+  zoneId String
+  zone   ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  prefix String
+
+  @@index([zoneId])
+  @@map("shipping_zone_prefixes")
+}
+
+model ShippingZoneDistrict {
+  id       String       @id @default(uuid())
+  zoneId   String
+  zone     ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  district String
+
+  @@index([zoneId])
+  @@map("shipping_zone_districts")
+}
+
+model Order {
+  id                 String          @id @default(uuid())
+  orderNo            String          @unique
+  userId             String
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId              String?
+  pet                Pet?            @relation(fields: [petId], references: [id], onDelete: SetNull)
+  status             OrderStatus     @default(PENDING)
+  expiresAt          DateTime?
+  currency           String          @default("BDT")
+  subtotalBDT        Int
+  shippingFeeBDT     Int
+  totalBDT           Int
+  weightGrams        Int
+  shippingZoneId     String?
+  shippingZone       ShippingZone?   @relation(fields: [shippingZoneId], references: [id], onDelete: SetNull)
+  shippingAddress    String
+  shippingDistrict   String?
+  shippingPostalCode String?
+  isHomeDelivery     Boolean         @default(true)
+  contactPhone       String?
+  contactName        String?
+  petQrUrl           String?
+  items              OrderItem[]
+  payments           PaymentIntent[]
+  manualPayments     ManualPayment[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([orderNo])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String  @id @default(uuid())
+  orderId          String
+  order            Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name             String
+  sku              String
+  unitPriceBDT     Int
+  quantity         Int
+  weightGrams      Int
+  categoryExtraBDT Int     @default(0)
+  totalBDT         Int
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model PaymentIntent {
+  id          String          @id @default(uuid())
+  orderId     String
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider    PaymentProvider
+  status      PaymentStatus   @default(CREATED)
+  amountBDT   Int
+  currency    String          @default("BDT")
+  sessionKey  String?
+  tranId      String?
+  valId       String?
+  redirectUrl String?
+  rawResponse Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([tranId, provider], name: "tranId_provider")
+  @@index([orderId])
+  @@index([provider])
+  @@index([status])
+  @@map("payment_intents")
+}
+
+model ManualPayment {
+  id            String              @id @default(uuid())
+  orderId       String
+  order         Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  method        ManualPaymentMethod
+  amountBDT     Int
+  currency      String              @default("BDT")
+  trxId         String
+  agentAccount  String?
+  contactNumber String?
+  note          String?
+  paidAt        DateTime?
+  status        ManualPaymentStatus @default(PENDING)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+  @@map("manual_payments")
+}

@@ -24,6 +24,13 @@ export interface UpdateUserDto {
   longitude?: number;
   geohash?: string;
   address?: string;
+  homeAddress?: string;
+  addressLine?: string;
+  landmark?: string;
+  zone?: string;
+  city?: string;
+  district?: string;
+  postalCode?: string;
 }
 
 @Injectable()
@@ -159,6 +166,33 @@ export class UserService {
 
     // Generate geohash if latitude and longitude are provided
     const updateData: any = { ...data };
+    if (
+      data.addressLine !== undefined ||
+      data.landmark !== undefined ||
+      data.zone !== undefined ||
+      data.city !== undefined ||
+      data.district !== undefined ||
+      data.postalCode !== undefined
+    ) {
+      const parts = [
+        data.addressLine ?? user.addressLine,
+        data.landmark ?? user.landmark,
+        data.zone ?? user.zone,
+        data.city ?? user.city,
+        data.district ?? user.district,
+        data.postalCode ?? user.postalCode,
+      ]
+        .map((p) => (p || '').trim())
+        .filter(Boolean);
+      updateData.homeAddress = parts.join(', ');
+      updateData.addressLine = data.addressLine ?? user.addressLine;
+      updateData.landmark = data.landmark ?? user.landmark;
+      updateData.zone = data.zone ?? user.zone;
+      updateData.city = data.city ?? user.city;
+      updateData.district = data.district ?? user.district;
+      updateData.postalCode = data.postalCode ?? user.postalCode;
+    }
+
     if (data.latitude !== undefined && data.longitude !== undefined) {
       updateData.geohash = ngeohash.encode(data.latitude, data.longitude, 7);
     }

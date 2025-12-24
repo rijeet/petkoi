@@ -302,6 +302,32 @@ export class ApiClient {
     });
   }
 
+  // Orders
+  async createOrder(payload: import('./api-types').CreateOrderRequest) {
+    return this.request<import('./api-types').CreateOrderResponse>('/orders', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getOrder(orderNo: string) {
+    return this.request<import('./api-types').Order>(`/orders/${orderNo}`);
+  }
+
+  async createSslSession(orderNo: string, opts?: { successUrl?: string; failUrl?: string; cancelUrl?: string }) {
+    return this.request('/payments/sslcommerz/session', {
+      method: 'POST',
+      body: JSON.stringify({ orderNo, ...opts }),
+    });
+  }
+
+  async submitManualPayment(payload: import('./api-types').ManualPaymentRequest) {
+    return this.request<import('./api-types').ManualPaymentResponse>('/payments/manual', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
   // Admin auth
   async adminLogin(email: string, password: string) {
     return this.request<{ otpToken: string }>('/admin/login', {
@@ -329,6 +355,50 @@ export class ApiClient {
       method: 'POST',
       body: JSON.stringify({ otpToken }),
     });
+  }
+
+  // Admin data
+  async adminListOrders(params?: { orderNo?: string; status?: string; userEmail?: string }) {
+    const search = new URLSearchParams();
+    if (params?.orderNo) search.set('orderNo', params.orderNo);
+    if (params?.status) search.set('status', params.status);
+    if (params?.userEmail) search.set('userEmail', params.userEmail);
+    const qs = search.toString();
+    return this.request(`/admin/orders${qs ? `?${qs}` : ''}`);
+  }
+
+  async adminGetOrder(orderNo: string) {
+    return this.request(`/admin/orders/${orderNo}`);
+  }
+
+  async adminUpdateTracking(orderNo: string, payload: { status: string; description?: string }) {
+    return this.request(`/admin/orders/${orderNo}/tracking`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async adminUpdateStatus(orderNo: string, status: string) {
+    return this.request(`/admin/orders/${orderNo}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async adminListUsers() {
+    return this.request('/admin/admin-users');
+  }
+
+  async adminListLostPets() {
+    return this.request('/admin/lost-pets');
+  }
+
+  async adminStats() {
+    return this.request('/admin/stats');
+  }
+
+  async adminListTables() {
+    return this.request('/admin/schema/tables');
   }
 
   // Notifications
@@ -538,6 +608,11 @@ export class ApiClient {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
+  }
+
+  // Orders
+  async getOrders() {
+    return this.request('/orders');
   }
 }
 

@@ -94,7 +94,17 @@ export class AuthController {
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     // The GoogleStrategy returns a flattened user object with email, name, picture as strings
     const user = req.user as any;
+    const callbackUrlEnv = process.env.GOOGLE_CALLBACK_URL;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    console.log('[google/callback] env callback URL:', callbackUrlEnv);
+    console.log('[google/callback] user from passport:', user);
     
+    if (!user) {
+      console.error('[google/callback] Missing req.user');
+      return res.status(HttpStatus.UNAUTHORIZED).send('Google authentication failed');
+    }
+
     // Try to retrieve location from cache (if stored before OAuth)
     let location: { latitude: number; longitude: number; address?: string } | undefined;
     const cacheKey = (req as any).locationCacheKey;
@@ -130,8 +140,9 @@ export class AuthController {
     
     // Redirect to frontend with token
     // Use FRONTEND_URL from env if set, otherwise fallback to localhost
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}`);
+    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}`;
+    console.log('[google/callback] redirecting to:', redirectUrl);
+    res.redirect(redirectUrl);
   }
 
   @Post('logout')

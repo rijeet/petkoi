@@ -15,6 +15,30 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
+  addressLine?: string;
+
+  @IsString()
+  @IsOptional()
+  landmark?: string;
+
+  @IsString()
+  @IsOptional()
+  zone?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  district?: string;
+
+  @IsString()
+  @IsOptional()
+  postalCode?: string;
+
+  @IsString()
+  @IsOptional()
   googleId?: string;
 
   @IsEnum(Role)
@@ -30,6 +54,30 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   homeAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  addressLine?: string;
+
+  @IsString()
+  @IsOptional()
+  landmark?: string;
+
+  @IsString()
+  @IsOptional()
+  zone?: string;
+
+  @IsString()
+  @IsOptional()
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  district?: string;
+
+  @IsString()
+  @IsOptional()
+  postalCode?: string;
 
   @IsString()
   @IsOptional()
@@ -68,6 +116,12 @@ export class UserResponseDto {
   email!: string;
   name?: string;
   homeAddress?: string;
+  addressLine?: string;
+  landmark?: string;
+  zone?: string;
+  city?: string;
+  district?: string;
+  postalCode?: string;
   role!: Role;
   createdAt!: Date;
   updatedAt!: Date;
