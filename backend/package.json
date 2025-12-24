@@ -20,7 +20,8 @@
     "prisma:studio": "prisma studio",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "seed:admin": "ts-node -r tsconfig-paths/register scripts/seed-admin.ts"
+    "seed:admin": "ts-node -r tsconfig-paths/register scripts/seed-admin.ts",
+    "seed:commerce": "ts-node -r tsconfig-paths/register scripts/seed-commerce.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.0",

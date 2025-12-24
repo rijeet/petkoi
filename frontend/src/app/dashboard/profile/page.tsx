@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api';
 import Loading from '@/components/Loading';
+import { ClipboardDocumentIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 interface UserProfile {
   id: string;
@@ -18,6 +19,12 @@ interface UserProfile {
   longitude?: number;
   address?: string;
   homeAddress?: string;
+  addressLine?: string;
+  landmark?: string;
+  zone?: string;
+  city?: string;
+  district?: string;
+  postalCode?: string;
 }
 
 export default function ProfilePage() {
@@ -32,11 +39,30 @@ export default function ProfilePage() {
     phone: '',
     profilePicture: '',
     homeAddress: '',
+    addressLine: '',
+    landmark: '',
+    zone: '',
+    city: '',
+    district: '',
+    postalCode: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressSaving, setAddressSaving] = useState(false);
+  const [addrForm, setAddrForm] = useState({
+    fullName: '',
+    phone: '',
+    district: '',
+    city: '',
+    zone: '',
+    postal: '',
+    landmark: '',
+    addressLine: '',
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -63,6 +89,12 @@ export default function ProfilePage() {
         phone: userData.phone || '',
         profilePicture: userData.profilePicture || '',
         homeAddress: userData.homeAddress || '',
+        addressLine: userData.addressLine || '',
+        landmark: userData.landmark || '',
+        zone: userData.zone || '',
+        city: userData.city || '',
+        district: userData.district || '',
+        postalCode: userData.postalCode || '',
       });
     } catch (error: unknown) {
       console.error('Failed to load profile:', error);
@@ -70,6 +102,65 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyId = async () => {
+    if (!profile?.id) return;
+    try {
+      await navigator.clipboard.writeText(profile.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch (err) {
+      console.error('Copy failed', err);
+    }
+  };
+
+  const assembleHomeAddress = () => {
+    const parts = [
+      addrForm.addressLine,
+      addrForm.landmark,
+      addrForm.zone,
+      addrForm.city,
+      addrForm.district,
+      addrForm.postal,
+    ]
+      .map((p) => (p || '').trim())
+      .filter(Boolean);
+    return parts.join(', ');
+  };
+
+  const parseSavedHomeAddress = (addr: string) => {
+    const parts = addr.split(',').map((p) => p.trim()).filter(Boolean);
+    let postal = '';
+    if (parts.length && /^\d{4}$/.test(parts[parts.length - 1])) {
+      postal = parts.pop() as string;
+    }
+    const district = parts.pop() || '';
+    const city = parts.pop() || '';
+    const zone = parts.pop() || '';
+    let addressLine = parts.join(', ');
+    let landmark = '';
+    const nearMatch = addressLine.match(/(.*?)(?:,?\s*)?(near\s.+)$/i);
+    if (nearMatch) {
+      addressLine = nearMatch[1].trim();
+      landmark = nearMatch[2].trim();
+    }
+    return { addressLine, zone, city, district, postal, landmark };
+  };
+
+  const openAddressModal = () => {
+    const parsed = parseSavedHomeAddress(formData.homeAddress || '');
+    setAddrForm({
+      fullName: formData.name,
+      phone: formData.phone,
+      district: formData.district || parsed.district,
+      city: formData.city || parsed.city,
+      zone: formData.zone || parsed.zone,
+      postal: formData.postalCode || parsed.postal,
+      landmark: formData.landmark || parsed.landmark || '',
+      addressLine: formData.addressLine || parsed.addressLine || '',
+    });
+    setShowAddressModal(true);
   };
 
   const handleSave = async () => {
@@ -101,6 +192,22 @@ export default function ProfilePage() {
         phone: profile.phone || '',
         profilePicture: profile.profilePicture || '',
         homeAddress: profile.homeAddress || '',
+        addressLine: profile.addressLine || '',
+        landmark: profile.landmark || '',
+        zone: profile.zone || '',
+        city: profile.city || '',
+        district: profile.district || '',
+        postalCode: profile.postalCode || '',
+      });
+      setAddrForm({
+        fullName: profile.name || '',
+        phone: profile.phone || '',
+        district: '',
+        city: '',
+        zone: '',
+        postal: '',
+        landmark: '',
+        addressLine: profile.homeAddress || '',
       });
     }
     setEditing(false);
@@ -211,6 +318,33 @@ export default function ProfilePage() {
           )}
 
           <div className="space-y-6">
+            {/* User ID */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                User ID
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={profile.id}
+                  disabled
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyId}
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition"
+                >
+                  {copied ? (
+                    <CheckIcon className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <ClipboardDocumentIcon className="w-5 h-5 text-gray-700" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Click to copy your user ID.</p>
+            </div>
+
             {/* Email - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -308,21 +442,18 @@ export default function ProfilePage() {
               <p className="text-xs text-gray-500 mb-2">
                 Provide this to help recovery efforts if your pet is lost.
               </p>
-              {editing ? (
-                <input
-                  type="text"
-                  value={formData.homeAddress}
-                  onChange={(e) => setFormData({ ...formData, homeAddress: e.target.value })}
-                  placeholder="Enter your home address"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
-                />
-              ) : (
-                <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between">
-                  <span className="text-gray-600">
-                    {profile.homeAddress ? profile.homeAddress : 'Not set'}
-                  </span>
-                </div>
-              )}
+              <div className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-gray-600">
+                  {formData.homeAddress || profile.homeAddress || 'Not set'}
+                </span>
+                <button
+                  type="button"
+                  className="text-sm text-pink-600 font-semibold hover:underline self-start sm:self-center"
+                  onClick={openAddressModal}
+                >
+                  Update
+                </button>
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -407,6 +538,117 @@ export default function ProfilePage() {
               )}
             </div>
           </div>
+
+          {showAddressModal && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+              <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">Structured Home Address</h3>
+                  <button
+                    className="text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowAddressModal(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium text-gray-700">Address line</label>
+                    <textarea
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      rows={2}
+                      value={addrForm.addressLine}
+                      onChange={(e) => setAddrForm({ ...addrForm, addressLine: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Landmark (optional)</label>
+                    <input
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      value={addrForm.landmark}
+                      onChange={(e) => setAddrForm({ ...addrForm, landmark: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Zone</label>
+                    <input
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      value={addrForm.zone}
+                      onChange={(e) => setAddrForm({ ...addrForm, zone: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">City</label>
+                    <input
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      value={addrForm.city}
+                      onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">District</label>
+                    <input
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      value={addrForm.district}
+                      onChange={(e) => setAddrForm({ ...addrForm, district: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Postal code</label>
+                    <input
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                      value={addrForm.postal}
+                      onChange={(e) => setAddrForm({ ...addrForm, postal: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    className="px-4 py-2 rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50"
+                    onClick={() => setShowAddressModal(false)}
+                    disabled={addressSaving}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-md bg-pink-500 text-white font-semibold hover:bg-pink-600 disabled:opacity-60"
+                    onClick={async () => {
+                      try {
+                        setAddressSaving(true);
+                        const assembled = assembleHomeAddress();
+                        setFormData((prev) => ({
+                          ...prev,
+                          homeAddress: assembled,
+                          addressLine: addrForm.addressLine,
+                          landmark: addrForm.landmark,
+                          zone: addrForm.zone,
+                          city: addrForm.city,
+                          district: addrForm.district,
+                          postalCode: addrForm.postal,
+                        }));
+                        await apiClient.updateUser(profile.id, {
+                          homeAddress: assembled,
+                          addressLine: addrForm.addressLine,
+                          landmark: addrForm.landmark,
+                          zone: addrForm.zone,
+                          city: addrForm.city,
+                          district: addrForm.district,
+                          postalCode: addrForm.postal,
+                        });
+                        await loadProfile();
+                        setShowAddressModal(false);
+                      } finally {
+                        setAddressSaving(false);
+                      }
+                    }}
+                    disabled={addressSaving}
+                  >
+                    {addressSaving ? 'Saving...' : 'Use this address'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

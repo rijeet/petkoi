@@ -5,48 +5,21 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
-import ResponsiveImage from '@/components/ResponsiveImage';
 
-interface PetTagOrder {
-  id: string;
-  petId: string;
-  userId: string;
-  qrUrl: string;
-  tagColor: string;
-  tagSize: string;
-  previewUrl?: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  pet: {
-    id: string;
-    name: string;
-    type: string;
-    breed?: string;
-    images?: Array<{ url: string }>;
-  };
+interface OrderSummary {
+  orderNo: string;
+  status?: string;
+  expiresAt?: string;
+  subtotalBDT?: number | null;
+  shippingFeeBDT?: number | null;
+  totalBDT?: number | null;
+  createdAt?: string;
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  PROCESSING: 'bg-blue-100 text-blue-800',
-  SHIPPED: 'bg-purple-100 text-purple-800',
-  DELIVERED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Pending',
-  PROCESSING: 'Processing',
-  SHIPPED: 'Shipped',
-  DELIVERED: 'Delivered',
-  CANCELLED: 'Cancelled',
-};
 
 export default function OrdersPage() {
   const router = useRouter();
   const { loading: authLoading, isAuthenticated } = useAuth();
-  const [orders, setOrders] = useState<PetTagOrder[]>([]);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,8 +40,19 @@ export default function OrdersPage() {
       if (token) {
         apiClient.setToken(token);
       }
-          const data = await apiClient.getMyPetTagOrders() as PetTagOrder[];
-          setOrders(data);
+      const data = (await apiClient.getOrders()) as OrderSummary[];
+      console.log('OrdersPage loadOrders response', data);
+      // Only filter out expired PENDING orders; keep orders that have moved past PENDING status
+      const filtered = (data || []).filter((o) => {
+        // If status is not PENDING, always show it
+        if (o.status && o.status !== 'PENDING') return true;
+        // If no expiry time, show it
+        if (!o.expiresAt) return true;
+        // Only hide if it's PENDING and expired
+        const expired = new Date(o.expiresAt).getTime() < Date.now();
+        return !expired;
+      });
+      setOrders(filtered);
     } catch (error) {
       console.error('Failed to load orders:', error);
     } finally {
@@ -114,73 +98,36 @@ export default function OrdersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {orders.map((order) => (
               <Link
-                key={order.id}
-                href={`/dashboard/orders/${order.id}`}
+                key={order.orderNo}
+                href={`/dashboard/orders/${order.orderNo}`}
                 className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
               >
-                {/* Pet Image or Preview */}
-                <div className="mb-4 flex justify-center">
-                  {order.previewUrl ? (
-                    <ResponsiveImage
-                      src={order.previewUrl}
-                      alt={`${order.pet.name} tag preview`}
-                      aspectRatio="square"
-                      containerClassName="w-full max-w-[200px] aspect-square"
-                      className="rounded-lg border-2 border-gray-200"
-                      showModal={true}
-                    />
-                  ) : order.pet.images && order.pet.images.length > 0 ? (
-                    <ResponsiveImage
-                      src={order.pet.images[0].url}
-                      alt={order.pet.name}
-                      aspectRatio="square"
-                      containerClassName="w-full max-w-[200px] aspect-square"
-                      className="rounded-lg"
-                      showModal={true}
-                    />
-                  ) : (
-                    <div className="w-full max-w-[200px] aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
-                      <span className="text-gray-400">No image</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Order Info */}
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">{order.pet.name}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                    <span className="capitalize">{order.pet.type}</span>
-                    {order.pet.breed && <span>• {order.pet.breed}</span>}
-                  </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-500">Color:</span>
-                    <span
-                      className="inline-block w-6 h-6 rounded-full border border-gray-300"
-                      style={{
-                        backgroundColor:
-                          order.tagColor === 'GREEN'
-                            ? '#4CAF50'
-                            : order.tagColor === 'PINK'
-                              ? '#E91E63'
-                              : order.tagColor === 'BLUE'
-                                ? '#2196F3'
-                                : '#212121',
-                      }}
-                    ></span>
-                  </div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-500">Status:</span>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        STATUS_COLORS[order.status] || STATUS_COLORS.PENDING
-                      }`}
-                    >
-                      {STATUS_LABELS[order.status] || order.status}
+                  <h3 className="text-xl font-semibold mb-2">Order {order.orderNo}</h3>
+                  <div className="flex items-center justify-between mb-2 text-sm text-gray-700">
+                    <span>Status</span>
+                    <span className="font-semibold">
+                      {order.status || 'Pending'}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400">
-                    Ordered: {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
+                  {order.status === 'PENDING' && order.expiresAt && new Date(order.expiresAt).getTime() > Date.now() && (
+                    <div className="flex items-center justify-between mb-2 text-xs text-gray-500">
+                      <span>Expires</span>
+                      <span>
+                        {new Date(order.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between mb-2 text-sm text-gray-700">
+                    <span>Total</span>
+                    <span className="font-semibold">
+                      {order.totalBDT !== undefined && order.totalBDT !== null ? `${order.totalBDT} BDT` : '—'}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
+                    <span>Placed: {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '—'}</span>
+                    <span className="text-pink-600 font-semibold">Track delivery →</span>
+                  </div>
                 </div>
               </Link>
             ))}

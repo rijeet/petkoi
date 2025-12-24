@@ -70,7 +70,6 @@ export default function NewPetPage() {
                 >
                   <option value="DOG">Dog</option>
                   <option value="CAT">Cat</option>
-                  <option value="BIRD">Bird</option>
                   <option value="OTHER">Other</option>
                 </select>
               </div>

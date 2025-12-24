@@ -1,119 +1,151 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 
-type AdminRole = 'SUPER_ADMIN' | 'ORDER_TRACKER' | 'LOST_PET' | 'ADOPTION' | 'HEALTH';
-
-const roleBadges: Record<AdminRole, { label: string; color: string }> = {
-  SUPER_ADMIN: { label: 'Super Admin', color: 'from-purple-500 to-indigo-500' },
-  ORDER_TRACKER: { label: 'Order Tracker', color: 'from-blue-500 to-cyan-500' },
-  LOST_PET: { label: 'Lost Pet', color: 'from-amber-500 to-orange-500' },
-  ADOPTION: { label: 'Adoption', color: 'from-emerald-500 to-teal-500' },
-  HEALTH: { label: 'Health', color: 'from-rose-500 to-pink-500' },
-};
-
-const roleSections: Array<{ role: AdminRole; title: string; description: string }> = [
-  { role: 'SUPER_ADMIN', title: 'System Administration', description: 'Manage all admin roles, settings, and security.' },
-  { role: 'ORDER_TRACKER', title: 'Order Tracking', description: 'Monitor and update pet tag and accessory orders.' },
-  { role: 'LOST_PET', title: 'Lost & Found', description: 'Handle lost pet reports and reunification workflows.' },
-  { role: 'ADOPTION', title: 'Adoption & Found Pets', description: 'Oversee adoption requests and found pet intake.' },
-  { role: 'HEALTH', title: 'Health & Wellness', description: 'Track health issues, vaccination follow-ups, and alerts.' },
+const MODULES = [
+  {
+    key: 'system',
+    title: 'System Administration',
+    badge: 'Super Admin',
+    description: 'Manage admin roles, settings, security, and platform controls.',
+    path: '/admin/system',
+  },
+  {
+    key: 'order-tracking',
+    title: 'Order Tracking',
+    badge: 'Order Tracker',
+    description: 'Monitor and update pet tag and accessory orders.',
+    path: '/admin/order-tracking',
+  },
+  {
+    key: 'lost-found',
+    title: 'Lost & Found',
+    badge: 'Lost Pet',
+    description: 'Handle lost pet reports and reunification workflows.',
+    path: '/admin/lost-found',
+  },
 ];
 
-export default function AdminHome() {
+export default function AdminIndexPage() {
   const router = useRouter();
-  const [role, setRole] = useState<AdminRole | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [stats, setStats] = useState<{ users: number; pets: number; orders: number; lostPets: number } | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('admin_access_token');
-    const storedRole = localStorage.getItem('admin_role') as AdminRole | null;
-    if (!token || !storedRole) {
-      router.replace('/admin/login');
+    if (!token) {
+      router.push('/admin/login');
       return;
     }
-    setRole(storedRole);
+    apiClient.setToken(token);
+    setAuthorized(true);
+    setChecking(false);
+    loadStats();
   }, [router]);
 
-  const handleLogout = async () => {
-    try {
-      await apiClient.adminLogout();
-    } finally {
-      localStorage.removeItem('admin_access_token');
-      localStorage.removeItem('admin_role');
-      sessionStorage.removeItem('admin_otp_token');
-      sessionStorage.removeItem('admin_email');
-      router.push('/admin/login');
-    }
-  };
+  if (checking || !authorized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 text-white">
+        <div className="text-center space-y-2">
+          <div className="animate-pulse h-3 w-20 bg-white/30 rounded-full mx-auto" />
+          <p className="text-sm text-white/80">Checking admin access…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white px-4 py-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-purple-100">
-              <span className="h-8 w-8 rounded-2xl bg-white/15 flex items-center justify-center">🛡️</span>
-              <span className="font-semibold">Admin Portal</span>
-            </div>
-            <h1 className="text-3xl font-bold mt-2">Welcome to Pet Koi Admin</h1>
-            <p className="text-purple-100 mt-1">Secure access for authorized administrators only.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {role && (
-              <span
-                className={`px-4 py-2 rounded-full bg-gradient-to-r ${roleBadges[role]?.color} text-sm font-semibold shadow-lg`}
-              >
-                {roleBadges[role]?.label || role}
-              </span>
-            )}
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 rounded-full border border-white/30 bg-white/10 hover:bg-white/15 text-sm font-semibold"
-            >
-              Logout
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 px-6 py-10 text-white">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <header className="space-y-2">
+          <p className="text-sm text-white/70">Admin Console</p>
+          <h1 className="text-3xl font-bold">Control Center</h1>
+          <p className="text-white/80">
+            Access advanced tools for system configuration, order oversight, and lost-pet operations.
+          </p>
         </header>
 
-        <div className="grid gap-4">
-          {roleSections
-            .filter((section) => role === 'SUPER_ADMIN' || section.role === role)
-            .map((section) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {['Users', 'Pets', 'Orders', 'Lost'].map((label, idx) => {
+            const value =
+              idx === 0 ? stats?.users : idx === 1 ? stats?.pets : idx === 2 ? stats?.orders : stats?.lostPets;
+            const colors = [
+              'from-pink-400 to-rose-500',
+              'from-indigo-400 to-blue-500',
+              'from-emerald-400 to-teal-500',
+              'from-amber-400 to-orange-500',
+            ];
+            return (
               <div
-                key={section.role}
-                className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg p-5 shadow-xl"
+                key={label}
+                className={`rounded-2xl border border-white/10 bg-gradient-to-br ${colors[idx]} text-white shadow-lg p-4 flex flex-col gap-1`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${roleBadges[section.role].color}`}>
-                      {roleBadges[section.role].label}
-                    </div>
-                    <h3 className="text-xl font-semibold">{section.title}</h3>
-                    <p className="text-purple-100 text-sm">{section.description}</p>
-                  </div>
-                  <Link
-                    href="#"
-                    className="text-sm font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/10 rounded-full px-3 py-2"
-                  >
-                    Open
-                  </Link>
+                <span className="text-xs uppercase tracking-wide">{label}</span>
+                <span className="text-2xl font-bold">{loadingStats ? '…' : value ?? '—'}</span>
+              </div>
+            );
+          })}
+        </div>
+        {statsError && <p className="text-sm text-red-200">{statsError}</p>}
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {MODULES.map((module) => (
+            <div
+              key={module.key}
+              className="rounded-2xl bg-white/10 border border-white/10 shadow-xl backdrop-blur p-6 flex flex-col justify-between hover:-translate-y-0.5 transition-transform"
+            >
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-2 text-xs font-semibold bg-white/15 text-white px-3 py-1 rounded-full">
+                  {module.badge}
+                </span>
+                <div className="space-y-1">
+                  <h2 className="text-xl font-semibold">{module.title}</h2>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    {module.description}
+                  </p>
                 </div>
               </div>
-            ))}
-        </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg p-5 shadow-xl">
-          <h3 className="text-lg font-semibold mb-2">Session & Security</h3>
-          <p className="text-purple-100 text-sm">
-            You are signed in with an admin session. Refresh tokens are stored in a secure, HTTP-only cookie.
-            Use Logout to revoke this session.
-          </p>
+              <div className="mt-6 flex items-center justify-between">
+                <div className="text-xs text-white/70">
+                  Advanced access • Admin only
+                </div>
+                <Link
+                  href={module.path}
+                  className="px-4 py-2 rounded-full bg-white text-purple-800 font-semibold shadow hover:shadow-lg transition"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
+
+  async function loadStats() {
+    try {
+      setLoadingStats(true);
+      setStatsError(null);
+      const data = (await apiClient.adminStats()) as any;
+      setStats({
+        users: data?.users ?? 0,
+        pets: data?.pets ?? 0,
+        orders: data?.orders ?? 0,
+        lostPets: data?.lostPets ?? 0,
+      });
+    } catch (err: any) {
+      setStatsError(err?.message || 'Failed to load stats');
+    } finally {
+      setLoadingStats(false);
+    }
+  }
 }
 

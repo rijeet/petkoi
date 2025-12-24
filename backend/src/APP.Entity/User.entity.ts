@@ -53,6 +53,24 @@ export class User {
   @Column({ nullable: true, type: 'text' })
   homeAddress?: string;
 
+  @Column({ nullable: true, type: 'text' })
+  addressLine?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  landmark?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  zone?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  city?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  district?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  postalCode?: string;
+
   @Column({ type: 'timestamptz', default: () => 'NOW()' })
   createdAt!: Date;
 
@@ -82,5 +100,7 @@ export class User {
 
   @OneToMany(() => UserSession, (session: UserSession) => session.user)
   sessions!: UserSession[];
+
+  // manual payments via Prisma only; no TypeORM relation needed here
 }
 

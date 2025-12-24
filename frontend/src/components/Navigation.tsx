@@ -41,24 +41,14 @@ export default function Navigation() {
                     My Pets
                   </Link>
                   <Link
-                    href="/community"
+                    href="/dashboard/orders"
                     className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                      isActive('/community')
+                      isActive('/dashboard/orders')
                         ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
                         : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
                     }`}
                   >
-                    Community
-                  </Link>
-                  <Link
-                    href="/map"
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                      isActive('/map')
-                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
-                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                    }`}
-                  >
-                    Map
+                    My Orders
                   </Link>
                   <Link
                     href="/dashboard/profile"
@@ -163,28 +153,6 @@ export default function Navigation() {
                 My Pets
               </Link>
               <Link
-                href="/community"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
-                  isActive('/community')
-                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
-                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                }`}
-              >
-                Community
-              </Link>
-              <Link
-                href="/map"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
-                  isActive('/map')
-                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
-                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                }`}
-              >
-                Map
-              </Link>
-              <Link
                 href="/dashboard/profile"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
@@ -194,6 +162,17 @@ export default function Navigation() {
                 }`}
               >
                 Profile
+              </Link>
+              <Link
+                href="/dashboard/orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  isActive('/dashboard/orders')
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                }`}
+              >
+                My Orders
               </Link>
             </div>
           </div>

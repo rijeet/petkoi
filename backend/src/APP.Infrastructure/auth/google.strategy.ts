@@ -18,19 +18,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
     const clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
-    if (!clientID || !clientSecret) {
-      throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be defined in environment variables');
+    const callbackURL = configService.get<string>('GOOGLE_CALLBACK_URL');
+
+    if (!clientID || !clientSecret || !callbackURL) {
+      throw new Error('GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL must be defined in environment variables');
     }
-    
-    // Build full callback URL
-    // Use BACKEND_URL from env if set, otherwise fallback to localhost
-    const backendUrl = configService.get<string>('BACKEND_URL') || 
-                      `http://localhost:${configService.get<string>('PORT', '3001')}`;
-    const callbackPath = configService.get<string>('GOOGLE_CALLBACK_URL', '/auth/google/callback');
-    const callbackURL = callbackPath.startsWith('http') 
-      ? callbackPath 
-      : `${backendUrl}${callbackPath}`;
-    
+
     super({
       clientID,
       clientSecret,
