@@ -253,5 +253,23 @@ export class NotificationService {
       where: { id: notificationId },
     });
   }
+
+  /**
+   * Create a generic notification
+   */
+  async createNotification(
+    userId: string,
+    type: NotificationType,
+    payload: Record<string, any>,
+  ) {
+    return this.prisma.notification.create({
+      data: {
+        userId,
+        type,
+        payload,
+        read: false,
+      },
+    });
+  }
 }
 

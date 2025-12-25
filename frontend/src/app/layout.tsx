@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import Navigation from '@/components/Navigation';
+import DonationPopup from '@/components/DonationPopup';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <Navigation />
+          <DonationPopup />
           {children}
         </Providers>
       </body>

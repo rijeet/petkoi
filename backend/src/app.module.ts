@@ -15,6 +15,9 @@ import { AdminAuthModule } from './APP.API/admin-auth/admin-auth.module';
 import { OrdersModule } from './APP.API/orders/orders.module';
 import { PaymentsModule } from './APP.API/payments/payments.module';
 import { AdminModule } from './APP.API/admin/admin.module';
+import { SupportModule } from './APP.API/support/support.module';
+import { VaccinesModule } from './APP.API/vaccines/vaccines.module';
+import { DonationsModule } from './APP.API/donations/donations.module';
 
 @Module({
   imports: [
@@ -36,6 +39,9 @@ import { AdminModule } from './APP.API/admin/admin.module';
     PetTagsModule,
     OrdersModule,
     PaymentsModule,
+    SupportModule,
+    VaccinesModule,
+    DonationsModule,
     AdminModule,
   ],
   controllers: [],

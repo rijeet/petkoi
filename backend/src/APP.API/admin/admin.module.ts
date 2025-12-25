@@ -8,16 +8,22 @@ import { AdminUsersController } from './admin-users.controller';
 import { AdminLostPetsController } from './admin-lost-pets.controller';
 import { AdminStatsController } from './admin-stats.controller';
 import { AdminSchemaController } from './admin-schema.controller';
+import { AdminSupportController } from './admin-support.controller';
+import { AdminDonationsController } from './admin-donations.controller';
 import { AdminAccessGuard } from '../../common/guards/admin-access.guard';
+import { SupportModule } from '../support/support.module';
+import { DonationsModule } from '../donations/donations.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, OrdersModule, JwtModule.register({})],
+  imports: [ConfigModule, PrismaModule, OrdersModule, SupportModule, DonationsModule, JwtModule.register({})],
   controllers: [
     AdminOrdersController,
     AdminUsersController,
     AdminLostPetsController,
     AdminStatsController,
     AdminSchemaController,
+    AdminSupportController,
+    AdminDonationsController,
   ],
   providers: [AdminAccessGuard],
 })

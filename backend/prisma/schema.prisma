@@ -47,6 +47,8 @@ model User {
   sessions                 UserSession[]
   orders                   Order[]
   manualPayments           ManualPayment[]
+  supportTickets           SupportTicket[] @relation("UserTickets")
+  donations                Donation[]
 
   @@index([geohash])
   @@map("users")
@@ -87,6 +89,7 @@ model AdminUser {
   updatedAt      DateTime       @updatedAt
   sessions       AdminSession[]
   otps           AdminOtp[]
+  assignedTickets SupportTicket[] @relation("AssignedTickets")
 
   @@map("admin_users")
 }
@@ -170,16 +173,17 @@ model PetImage {
 }
 
 model Vaccine {
-  id            String    @id @default(uuid())
-  petId         String
-  pet           Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
-  name          String
-  doseNumber    Int?
-  clinic        String?
-  injectionDate DateTime
-  nextDueDate   DateTime?
-  extractedMeta Json?
-  createdAt     DateTime  @default(now())
+  id                 String    @id @default(uuid())
+  petId              String
+  pet                Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+  name               String
+  doseNumber         Int?
+  clinic             String?
+  injectionDate      DateTime
+  nextDueDate        DateTime?
+  prescriptionImageUrl String?
+  extractedMeta      Json?
+  createdAt          DateTime  @default(now())
 
   @@index([petId])
   @@index([nextDueDate])
@@ -341,6 +345,8 @@ enum NotificationType {
   LOST_PET_FOUND
   LOST_ALERT
   VACCINE_REMINDER
+  DONATION_VERIFIED
+  DONATION_REJECTED
   OTHER
 }
 
@@ -598,4 +604,99 @@ model ManualPayment {
   @@index([orderId])
   @@index([userId])
   @@map("manual_payments")
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model SupportTicket {
+  id          String              @id @default(uuid())
+  ticketNo    String              @unique
+  userId      String
+  user        User                @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  status      SupportTicketStatus @default(OPEN)
+  priority    SupportTicketPriority @default(MEDIUM)
+  assignedTo  String?
+  assignedAdmin AdminUser?        @relation("AssignedTickets", fields: [assignedTo], references: [id], onDelete: SetNull)
+  messages    SupportMessage[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  resolvedAt  DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedTo])
+  @@index([createdAt])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id          String        @id @default(uuid())
+  ticketId    String
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId    String
+  senderType  MessageSenderType
+  content     String
+  isRead      Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  @@index([ticketId])
+  @@index([createdAt])
+  @@map("support_messages")
+}
+
+enum MessageSenderType {
+  USER
+  ADMIN
+}
+
+enum DonationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum DonationMethod {
+  BKASH
+  NAGAD
+  ROCKET
+  BANK
+  PAYPAL
+  OTHER
+}
+
+model Donation {
+  id            String          @id @default(uuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  method        DonationMethod
+  amountBDT     Int
+  currency      String          @default("BDT")
+  trxId         String
+  agentAccount  String?
+  contactNumber String?
+  note          String?
+  paidAt        DateTime?
+  status        DonationStatus  @default(PENDING)
+  verifiedBy   String?
+  verifiedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("donations")
 }

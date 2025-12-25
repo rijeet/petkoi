@@ -102,6 +102,7 @@ async function bootstrap() {
     .addTag('pets', 'Pet management - Create, update, view pet profiles')
     .addTag('pet-images', 'Pet image uploads - ImageKit integration for pet photos')
     .addTag('pet-tags', 'Pet tag orders - Order custom QR code tags for pets')
+    .addTag('vaccines', 'Vaccine records - Manage pet vaccination records and prescription images')
     .addTag('orders', 'Order management - View and manage pet tag orders')
     .addTag('payments', 'Payment processing - Manual payment submission and verification')
     .addTag('gps', 'GPS location tracking - Track pet locations with geohash')
@@ -110,6 +111,8 @@ async function bootstrap() {
     .addTag('directory', 'Directory services - Guards and waste collectors information')
     .addTag('admin', 'Admin endpoints - Order tracking, user management, statistics')
     .addTag('admin-auth', 'Admin authentication - Admin login, OTP verification')
+    .addTag('support', 'Support tickets - User support ticket management')
+    .addTag('donations', 'Donations - User donations and verification')
     .addTag('health', 'Health checks - Service health and readiness')
     .build();
 

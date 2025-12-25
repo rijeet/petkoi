@@ -17,22 +17,45 @@ export default function Navigation() {
       {/* Animated background glow effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-pink-500/10 to-purple-500/10 animate-pulse"></div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-8">
+      <div className="w-full mx-auto px-8 sm:px-12 lg:px-16 xl:px-20 relative z-10">
+        <div className="flex justify-between items-center h-16 min-h-[64px]">
+          <div className="flex items-center gap-2 flex-nowrap flex-1">
             <Link 
               href="/" 
               className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:drop-shadow-[0_0_20px_rgba(236,72,153,0.8)] transition-all duration-300"
             >
               Pet Koi
             </Link>
+            <div className="flex-[0.5]"></div>
+            {/* About Us Link - Visible to everyone */}
+            <Link
+              href="/about"
+              className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
+                isActive('/about')
+                  ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                  : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+              }`}
+            >
+              About Us
+            </Link>
+            {/* FAQ Link - Visible to everyone */}
+            <Link
+              href="/faq"
+              className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
+                isActive('/faq')
+                  ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                  : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+              }`}
+            >
+              FAQ
+            </Link>
             {isAuthenticated && (
               <>
                 {/* Desktop Navigation Links */}
-                <div className="hidden lg:flex items-center gap-3">
+                <div className="hidden lg:flex items-center gap-3 flex-nowrap">
                   <Link
                     href="/dashboard/pets"
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                    className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
                       isActive('/dashboard/pets')
                         ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
                         : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
@@ -42,7 +65,7 @@ export default function Navigation() {
                   </Link>
                   <Link
                     href="/dashboard/orders"
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                    className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
                       isActive('/dashboard/orders')
                         ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
                         : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
@@ -52,13 +75,33 @@ export default function Navigation() {
                   </Link>
                   <Link
                     href="/dashboard/profile"
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                    className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
                       isActive('/dashboard/profile')
                         ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
                         : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
                     }`}
                   >
                     Profile
+                  </Link>
+                  <Link
+                    href="/dashboard/support"
+                    className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
+                      isActive('/dashboard/support') || isActive('/dashboard/support/')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Support
+                  </Link>
+                  <Link
+                    href="/dashboard/donations"
+                    className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-medium whitespace-nowrap ${
+                      isActive('/dashboard/donations')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-105'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Donate
                   </Link>
                 </div>
 
@@ -95,7 +138,7 @@ export default function Navigation() {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {loading ? (
               <span className="text-cyan-300 animate-pulse">Loading...</span>
             ) : isAuthenticated && user ? (
@@ -121,7 +164,7 @@ export default function Navigation() {
                 </Link>
                 <button
                   onClick={logout}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.5)] hover:shadow-[0_0_15px_rgba(239,68,68,0.8)] font-medium"
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg hover:from-red-600 hover:to-pink-700 transition-all duration-300 shadow-[0_0_10px_rgba(239,68,68,0.5)] hover:shadow-[0_0_15px_rgba(239,68,68,0.8)] font-medium whitespace-nowrap"
                 >
                   Sign Out
                 </button>
@@ -129,7 +172,7 @@ export default function Navigation() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-pink-500 text-white rounded-lg hover:from-cyan-600 hover:to-pink-600 transition-all duration-300 shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:shadow-[0_0_20px_rgba(236,72,153,0.8)] font-medium"
+                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-pink-500 text-white rounded-lg hover:from-cyan-600 hover:to-pink-600 transition-all duration-300 shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:shadow-[0_0_20px_rgba(236,72,153,0.8)] font-medium whitespace-nowrap"
               >
                 Sign In
               </Link>
@@ -138,42 +181,90 @@ export default function Navigation() {
         </div>
 
         {/* Mobile/Tablet Menu Dropdown */}
-        {isAuthenticated && mobileMenuOpen && (
+        {mobileMenuOpen && (
           <div className="lg:hidden border-t border-pink-500/30 py-4 animate-in slide-in-from-top duration-300">
             <div className="flex flex-col gap-2">
               <Link
-                href="/dashboard/pets"
+                href="/about"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
-                  isActive('/dashboard/pets')
+                  isActive('/about')
                     ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
                     : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
                 }`}
               >
-                My Pets
+                About Us
               </Link>
               <Link
-                href="/dashboard/profile"
+                href="/faq"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
-                  isActive('/dashboard/profile')
+                  isActive('/faq')
                     ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
                     : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
                 }`}
               >
-                Profile
+                FAQ
               </Link>
-              <Link
-                href="/dashboard/orders"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
-                  isActive('/dashboard/orders')
-                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
-                    : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
-                }`}
-              >
-                My Orders
-              </Link>
+              {isAuthenticated && (
+                <>
+                  <Link
+                    href="/dashboard/pets"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/pets')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    My Pets
+                  </Link>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/profile')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="/dashboard/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/orders')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    My Orders
+                  </Link>
+                  <Link
+                    href="/dashboard/support"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/support') || isActive('/dashboard/support/')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Support
+                  </Link>
+                  <Link
+                    href="/dashboard/donations"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-lg transition-all duration-300 font-medium ${
+                      isActive('/dashboard/donations')
+                        ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.6)]'
+                        : 'text-cyan-300 hover:text-white hover:bg-pink-500/20 hover:shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                    }`}
+                  >
+                    Donate
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
