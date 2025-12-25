@@ -12,7 +12,7 @@ import {
   HttpStatus,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { PetService } from '../../APP.BLL/services/pet.service';
 import { CreatePetDto, UpdatePetDto } from '../../APP.Shared/dtos/pet.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -28,6 +28,7 @@ export class PetsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new pet' })
+  @ApiBody({ type: CreatePetDto })
   @ApiResponse({ status: 201, description: 'Pet created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @HttpCode(HttpStatus.CREATED)
@@ -68,6 +69,10 @@ export class PetsController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update pet information' })
+  @ApiBody({ type: UpdatePetDto })
+  @ApiResponse({ status: 200, description: 'Pet updated successfully' })
+  @ApiResponse({ status: 404, description: 'Pet not found' })
   async update(
     @Param('id') id: string,
     @Body() updatePetDto: UpdatePetDto,
@@ -85,6 +90,17 @@ export class PetsController {
   }
 
   @Patch(':id/lost')
+  @ApiOperation({ summary: 'Set pet lost status' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        isLost: { type: 'boolean', example: true, description: 'Whether the pet is lost' },
+      },
+      required: ['isLost'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Lost status updated successfully' })
   @HttpCode(HttpStatus.OK)
   async setLostStatus(
     @Param('id') id: string,
@@ -102,6 +118,23 @@ export class PetsController {
 
   @Post(':id/found')
   @Public()
+  @ApiOperation({ summary: 'Report a found pet (public endpoint)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        lat: { type: 'number', example: 23.8103, description: 'Latitude' },
+        lng: { type: 'number', example: 90.4125, description: 'Longitude' },
+        address: { type: 'string', example: '123 Main Street, Dhaka', description: 'Address where pet was found' },
+        note: { type: 'string', example: 'Found near the park', description: 'Additional notes' },
+        imageUrl: { type: 'string', example: 'https://example.com/image.jpg', description: 'Image URL' },
+        phone: { type: 'string', example: '01712345678', description: 'Contact phone (Bangladesh format)' },
+      },
+      required: ['lat', 'lng', 'address', 'phone'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Found report submitted successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input - address and phone are required' })
   @HttpCode(HttpStatus.OK)
   async reportFound(
     @Param('id') id: string,

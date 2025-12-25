@@ -77,29 +77,40 @@ async function bootstrap() {
   });
 
   // Swagger/OpenAPI documentation
+  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const apiUrl = process.env.API_URL || `http://localhost:${process.env.PORT || 3001}`;
+  
   const config = new DocumentBuilder()
-    .setTitle('Pet Koi')
-    .setDescription('REST API for Pet Koi - QR codes, GPS tracking, and community features')
+    .setTitle('Pet Koi API')
+    .setDescription('REST API for Pet Koi - QR codes, GPS tracking, and community features. This API provides endpoints for pet management, user authentication, order processing, and community interactions.')
     .setVersion('1.0')
+    .addServer(apiUrl, 'Current server')
+    .addServer('http://localhost:3001', 'Local development')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'JWT',
-        description: 'Enter JWT token',
+        description: 'Enter JWT token obtained from /auth/google or /auth/refresh',
         in: 'header',
       },
       'JWT-auth',
     )
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('users', 'User management')
-    .addTag('pets', 'Pet management')
-    .addTag('pet-images', 'Pet image uploads (ImageKit)')
-    .addTag('gps', 'GPS location tracking')
-    .addTag('notifications', 'User notifications')
-    .addTag('community', 'Community posts and comments')
-    .addTag('directory', 'Guards and waste collectors directory')
+    .addTag('auth', 'Authentication endpoints - Google OAuth, JWT tokens, sessions')
+    .addTag('users', 'User management - Profile, settings, user data')
+    .addTag('pets', 'Pet management - Create, update, view pet profiles')
+    .addTag('pet-images', 'Pet image uploads - ImageKit integration for pet photos')
+    .addTag('pet-tags', 'Pet tag orders - Order custom QR code tags for pets')
+    .addTag('orders', 'Order management - View and manage pet tag orders')
+    .addTag('payments', 'Payment processing - Manual payment submission and verification')
+    .addTag('gps', 'GPS location tracking - Track pet locations with geohash')
+    .addTag('notifications', 'User notifications - Lost pet alerts and updates')
+    .addTag('community', 'Community posts and comments - Share posts, upvote, comment')
+    .addTag('directory', 'Directory services - Guards and waste collectors information')
+    .addTag('admin', 'Admin endpoints - Order tracking, user management, statistics')
+    .addTag('admin-auth', 'Admin authentication - Admin login, OTP verification')
+    .addTag('health', 'Health checks - Service health and readiness')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
