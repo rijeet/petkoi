@@ -9,7 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { PetTagOrderService } from '../../APP.BLL/services/pet-tag-order.service';
 import { CreatePetTagOrderDto, UpdatePetTagOrderStatusDto, PetTagOrderStatus } from '../../APP.Shared/dtos/pet-tag.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -24,6 +24,7 @@ export class PetTagsController {
 
   @Post('order')
   @ApiOperation({ summary: 'Create a new pet tag order' })
+  @ApiBody({ type: CreatePetTagOrderDto })
   @ApiResponse({ status: 201, description: 'Order created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input or pet has no QR code' })
   @ApiResponse({ status: 403, description: 'User does not own the pet' })
@@ -54,6 +55,7 @@ export class PetTagsController {
 
   @Patch('order/:id/status')
   @ApiOperation({ summary: 'Update order status' })
+  @ApiBody({ type: UpdatePetTagOrderStatusDto })
   @ApiResponse({ status: 200, description: 'Order status updated successfully' })
   @ApiResponse({ status: 403, description: 'User does not own the order' })
   @ApiResponse({ status: 404, description: 'Order not found' })

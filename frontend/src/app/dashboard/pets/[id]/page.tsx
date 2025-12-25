@@ -24,6 +24,17 @@ interface PetImage {
   createdAt: string;
 }
 
+interface Vaccine {
+  id: string;
+  name: string;
+  doseNumber?: number;
+  clinic?: string;
+  injectionDate: string;
+  nextDueDate?: string;
+  prescriptionImageUrl?: string;
+  createdAt: string;
+}
+
 interface Pet {
   id: string;
   name: string;
@@ -55,10 +66,12 @@ export default function PetDetailPage() {
   const { user } = useAuth();
   const [pet, setPet] = useState<Pet | null>(null);
   const [images, setImages] = useState<PetImage[]>([]);
+  const [vaccines, setVaccines] = useState<Vaccine[]>([]);
   const [loading, setLoading] = useState(true);
   const [showQR, setShowQR] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const [loadingVaccines, setLoadingVaccines] = useState(false);
   const [imageFitMode, setImageFitMode] = useState<'cover' | 'contain'>('cover');
   const isOwner = pet?.owner?.id === user?.id;
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -67,6 +80,7 @@ export default function PetDetailPage() {
   useEffect(() => {
     loadPet();
     loadImages();
+    loadVaccines();
   }, [params.id]);
 
   useEffect(() => {
@@ -102,6 +116,22 @@ export default function PetDetailPage() {
           setImages(data);
     } catch (error) {
       console.error('Failed to load images:', error);
+    }
+  };
+
+  const loadVaccines = async () => {
+    try {
+      setLoadingVaccines(true);
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        apiClient.setToken(token);
+      }
+      const data = await apiClient.getPetVaccines(params.id as string) as Vaccine[];
+      setVaccines(data || []);
+    } catch (error) {
+      console.error('Failed to load vaccines:', error);
+    } finally {
+      setLoadingVaccines(false);
     }
   };
 
@@ -431,6 +461,87 @@ export default function PetDetailPage() {
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-base">{pet.description}</p>
               </div>
             )}
+
+            {/* Vaccine Info Card */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-semibold text-gray-900 text-xl tracking-tight">💉 Vaccine Info</h3>
+                {isOwner && (
+                  <Link
+                    href={`/dashboard/pets/${pet.id}/vaccines`}
+                    className="px-4 py-2 text-sm bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full hover:from-green-600 hover:to-green-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+                  >
+                    + Add Vaccine
+                  </Link>
+                )}
+              </div>
+              {loadingVaccines ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-pink-500"></div>
+                  <span className="ml-3 text-gray-600">Loading vaccines...</span>
+                </div>
+              ) : vaccines.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="text-4xl mb-3">💉</div>
+                  <p className="text-sm">No vaccine records yet</p>
+                  {isOwner && (
+                    <p className="text-xs mt-2 text-gray-400">
+                      Click "Add Vaccine" to record vaccination history
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {vaccines.map((vaccine) => (
+                    <div
+                      key={vaccine.id}
+                      className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 text-lg mb-1">{vaccine.name}</h4>
+                          {vaccine.doseNumber && (
+                            <p className="text-sm text-gray-600">Dose #{vaccine.doseNumber}</p>
+                          )}
+                        </div>
+                        {vaccine.prescriptionImageUrl && (
+                          <div className="ml-4">
+                            <img
+                              src={vaccine.prescriptionImageUrl}
+                              alt="Prescription"
+                              className="w-16 h-16 object-cover rounded-lg border border-gray-200 cursor-pointer hover:scale-110 transition-transform"
+                              onClick={() => window.open(vaccine.prescriptionImageUrl, '_blank')}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        {vaccine.clinic && (
+                          <div>
+                            <span className="text-gray-600 font-medium">Clinic:</span>
+                            <p className="text-gray-900">{vaccine.clinic}</p>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-gray-600 font-medium">Injection Date:</span>
+                          <p className="text-gray-900">
+                            {new Date(vaccine.injectionDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {vaccine.nextDueDate && (
+                          <div>
+                            <span className="text-gray-600 font-medium">Next Due:</span>
+                            <p className="text-gray-900">
+                              {new Date(vaccine.nextDueDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Notifications Card - Only show for owner */}
             {isOwner && (

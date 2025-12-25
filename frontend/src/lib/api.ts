@@ -401,6 +401,88 @@ export class ApiClient {
     return this.request('/admin/schema/tables');
   }
 
+  // Admin Donations
+  async adminGetDonations(status?: string) {
+    const params = status ? `?status=${status}` : '';
+    return this.request(`/admin/donations${params}`);
+  }
+
+  async adminGetDonationStats() {
+    return this.request('/admin/donations/stats');
+  }
+
+  async adminGetDonation(donationId: string) {
+    return this.request(`/admin/donations/${donationId}`);
+  }
+
+  async adminVerifyDonation(donationId: string, data: { status: string; note?: string }) {
+    return this.request(`/admin/donations/${donationId}/verify`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Support Tickets (User)
+  async getSupportTickets() {
+    return this.request('/support/tickets');
+  }
+
+  async getSupportTicket(ticketId: string) {
+    return this.request(`/support/tickets/${ticketId}`);
+  }
+
+  async createSupportTicket(data: { subject: string; message: string; priority?: string }) {
+    return this.request('/support/tickets', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async sendSupportTicketMessage(ticketId: string, content: string) {
+    return this.request(`/support/tickets/${ticketId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+  }
+
+  async markSupportTicketAsRead(ticketId: string) {
+    return this.request(`/support/tickets/${ticketId}/read`, {
+      method: 'PATCH',
+    });
+  }
+
+  // Admin Support Tickets
+  async adminGetSupportTickets(status?: string) {
+    const params = status ? `?status=${status}` : '';
+    return this.request(`/admin/support/tickets${params}`);
+  }
+
+  async adminGetSupportTicket(ticketId: string) {
+    return this.request(`/admin/support/tickets/${ticketId}`);
+  }
+
+  async adminUpdateTicketStatus(ticketId: string, status: string) {
+    return this.request(`/admin/support/tickets/${ticketId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async adminAssignTicket(ticketId: string, adminId: string) {
+    return this.request(`/admin/support/tickets/${ticketId}/assign`, {
+      method: 'PATCH',
+      body: JSON.stringify({ adminId }),
+    });
+  }
+
+  async adminSendTicketMessage(ticketId: string, content: string) {
+    return this.request(`/admin/support/tickets/${ticketId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+  }
+
+
   // Notifications
   async getNotifications(limit?: number, offset?: number) {
     const params = new URLSearchParams();
@@ -613,6 +695,96 @@ export class ApiClient {
   // Orders
   async getOrders() {
     return this.request('/orders');
+  }
+
+  // Vaccines
+  async getPetVaccines(petId: string) {
+    return this.request(`/pets/${petId}/vaccines`);
+  }
+
+  async getVaccine(petId: string, vaccineId: string) {
+    return this.request(`/pets/${petId}/vaccines/${vaccineId}`);
+  }
+
+  async createVaccine(petId: string, data: {
+    name: string;
+    doseNumber?: number;
+    clinic?: string;
+    injectionDate: string;
+    nextDueDate?: string;
+  }) {
+    return this.request(`/pets/${petId}/vaccines`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateVaccine(petId: string, vaccineId: string, data: {
+    name?: string;
+    doseNumber?: number;
+    clinic?: string;
+    injectionDate?: string;
+    nextDueDate?: string;
+  }) {
+    return this.request(`/pets/${petId}/vaccines/${vaccineId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteVaccine(petId: string, vaccineId: string) {
+    return this.request(`/pets/${petId}/vaccines/${vaccineId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async uploadVaccinePrescription(petId: string, vaccineId: string, file: File) {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const token = this.token;
+    const url = `${this.baseUrl}/pets/${petId}/vaccines/${vaccineId}/prescription`;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(error.message || 'Failed to upload prescription');
+    }
+
+    return response.json();
+  }
+
+  // Donations
+  async getDonations() {
+    return this.request('/donations');
+  }
+
+  async getDonation(id: string) {
+    return this.request(`/donations/${id}`);
+  }
+
+  async createDonation(data: {
+    method: string;
+    amountBDT: number;
+    trxId: string;
+    agentAccount?: string;
+    contactNumber?: string;
+    note?: string;
+  }) {
+    return this.request('/donations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 }
 

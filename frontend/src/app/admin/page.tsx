@@ -27,6 +27,20 @@ const MODULES = [
     description: 'Handle lost pet reports and reunification workflows.',
     path: '/admin/lost-found',
   },
+  {
+    key: 'donations',
+    title: 'Donation Management',
+    badge: 'Donations',
+    description: 'View, verify, and manage user donations and contributions.',
+    path: '/admin/donations',
+  },
+  {
+    key: 'support',
+    title: 'Support Tickets',
+    badge: 'Support',
+    description: 'Manage user support tickets and respond to customer inquiries.',
+    path: '/admin/support',
+  },
 ];
 
 export default function AdminIndexPage() {
