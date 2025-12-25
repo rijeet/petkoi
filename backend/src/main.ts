@@ -6,7 +6,36 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './APP.Shared/filters/global-exception.filter';
 
+function validateEnvironmentVariables() {
+  const required = [
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET',
+    'GOOGLE_CALLBACK_URL',
+  ];
+  
+  const missing: string[] = [];
+  for (const key of required) {
+    if (!process.env[key]) {
+      missing.push(key);
+    }
+  }
+  
+  if (missing.length > 0) {
+    console.error('❌ Missing required environment variables:');
+    missing.forEach(key => console.error(`   - ${key}`));
+    console.error('\nPlease set these variables in your environment or .env file.');
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+  
+  console.log('✅ All required environment variables are set');
+}
+
 async function bootstrap() {
+  // Validate environment variables before starting
+  validateEnvironmentVariables();
+  
   const app = await NestFactory.create(AppModule);
 
   // Increase body size limit to 10MB (for image uploads and base64 data)
@@ -82,8 +111,12 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
-  console.log(`Backend running on port ${port}`);
+  console.log(`✅ Backend running on port ${port}`);
+  console.log(`📚 API Documentation: http://localhost:${port}/docs/api`);
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('❌ Failed to start application:', error);
+  process.exit(1);
+});
 

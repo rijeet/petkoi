@@ -92,57 +92,74 @@ export class AuthController {
   @Public()
   @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-    // The GoogleStrategy returns a flattened user object with email, name, picture as strings
-    const user = req.user as any;
-    const callbackUrlEnv = process.env.GOOGLE_CALLBACK_URL;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    try {
+      // The GoogleStrategy returns a flattened user object with email, name, picture as strings
+      const user = req.user as any;
+      const callbackUrlEnv = process.env.GOOGLE_CALLBACK_URL;
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-    console.log('[google/callback] env callback URL:', callbackUrlEnv);
-    console.log('[google/callback] user from passport:', user);
-    
-    if (!user) {
-      console.error('[google/callback] Missing req.user');
-      return res.status(HttpStatus.UNAUTHORIZED).send('Google authentication failed');
-    }
-
-    // Try to retrieve location from cache (if stored before OAuth)
-    let location: { latitude: number; longitude: number; address?: string } | undefined;
-    const cacheKey = (req as any).locationCacheKey;
-    if (cacheKey) {
-      location = locationCache.get(cacheKey);
-      if (location) {
-        // Clean up cache entry
-        locationCache.delete(cacheKey);
+      console.log('[google/callback] env callback URL:', callbackUrlEnv);
+      console.log('[google/callback] user from passport:', user);
+      
+      if (!user) {
+        console.error('[google/callback] Missing req.user');
+        return res.status(HttpStatus.UNAUTHORIZED).send('Google authentication failed');
       }
+
+      // Try to retrieve location from cache (if stored before OAuth)
+      let location: { latitude: number; longitude: number; address?: string } | undefined;
+      const cacheKey = (req as any).locationCacheKey;
+      if (cacheKey) {
+        location = locationCache.get(cacheKey);
+        if (location) {
+          // Clean up cache entry
+          locationCache.delete(cacheKey);
+        }
+      }
+      
+      // Also check query params as fallback (frontend can pass location after OAuth)
+      const lat = req.query.lat as string | undefined;
+      const lng = req.query.lng as string | undefined;
+      const address = req.query.address as string | undefined;
+      if (lat && lng && !location) {
+        location = {
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng),
+          address: address || undefined,
+        };
+      }
+      
+      console.log('[google/callback] Calling handleGoogleLogin...');
+      const result = await this.authService.handleGoogleLogin(user, location, {
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'] as string | undefined,
+      });
+      console.log('[google/callback] handleGoogleLogin succeeded');
+      
+      this.setRefreshCookie(
+        res,
+        this.buildRefreshCookieValue(result.sessionId, result.refreshToken),
+        result.refreshExpiresAt,
+      );
+      
+      // Redirect to frontend with token
+      // Use FRONTEND_URL from env if set, otherwise fallback to localhost
+      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}`;
+      console.log('[google/callback] redirecting to:', redirectUrl);
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error('[google/callback] Error in callback handler:', error);
+      console.error('[google/callback] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      console.error('[google/callback] Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        name: error instanceof Error ? error.name : 'Unknown',
+      });
+      
+      // Return error response instead of throwing to prevent double error handling
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      return res.redirect(`${frontendUrl}/auth/callback?error=${encodeURIComponent(errorMessage)}`);
     }
-    
-    // Also check query params as fallback (frontend can pass location after OAuth)
-    const lat = req.query.lat as string | undefined;
-    const lng = req.query.lng as string | undefined;
-    const address = req.query.address as string | undefined;
-    if (lat && lng && !location) {
-      location = {
-        latitude: parseFloat(lat),
-        longitude: parseFloat(lng),
-        address: address || undefined,
-      };
-    }
-    
-    const result = await this.authService.handleGoogleLogin(user, location, {
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'] as string | undefined,
-    });
-    this.setRefreshCookie(
-      res,
-      this.buildRefreshCookieValue(result.sessionId, result.refreshToken),
-      result.refreshExpiresAt,
-    );
-    
-    // Redirect to frontend with token
-    // Use FRONTEND_URL from env if set, otherwise fallback to localhost
-    const redirectUrl = `${frontendUrl}/auth/callback?token=${result.accessToken}`;
-    console.log('[google/callback] redirecting to:', redirectUrl);
-    res.redirect(redirectUrl);
   }
 
   @Post('logout')

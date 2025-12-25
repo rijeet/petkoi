@@ -60,11 +60,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // Unknown errors
     // eslint-disable-next-line no-console
     console.error('Unhandled exception', exception);
+    const errorMessage = exception instanceof Error ? exception.message : String(exception);
+    const errorStack = exception instanceof Error ? exception.stack : undefined;
+    const errorName = exception instanceof Error ? exception.name : 'UnknownError';
+    
+    // Log full error details for debugging
+    console.error('Error details:', {
+      name: errorName,
+      message: errorMessage,
+      stack: errorStack,
+      url: request.url,
+      method: request.method,
+    });
+    
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'Internal server error',
       path: request.url,
       timestamp: new Date().toISOString(),
+      // Include error message in development for easier debugging
+      ...(process.env.NODE_ENV !== 'production' && { error: errorMessage }),
     });
   }
 }
